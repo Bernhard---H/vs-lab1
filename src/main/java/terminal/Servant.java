@@ -26,6 +26,10 @@ public abstract class Servant {
 
         Command command = this.parser.parse(input);
         IInstruction<T> instruction = this.store.findInstruction(command);
+        if (instruction == null) {
+            // todo: throw exception
+            return;
+        }
 
         IArgumentsParser<T> argsParser = instruction.getArgumentsParser();
         T arguments = argsParser.parse(command.getParameter());
