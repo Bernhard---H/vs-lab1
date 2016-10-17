@@ -1,8 +1,7 @@
 package terminal.parser;
 
 import terminal.model.Command;
-import terminal.model.SimpleArgument;
-import terminal.parser.exceptions.ParseException;
+import terminal.exceptions.ParseException;
 
 /**
  * @author Bernhard Halbartschlager
@@ -17,7 +16,7 @@ public interface ICommandParser {
      * @return successfully parsed input string, always != null
      * @throws ParseException
      */
-    Command<SimpleArgument> parse(String input) throws ParseException;
+    Command parse(String input) throws ParseException;
 
 
 }

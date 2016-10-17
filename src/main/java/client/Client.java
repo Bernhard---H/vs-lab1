@@ -1,10 +1,11 @@
 package client;
 
+import util.Config;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
-import util.Config;
 
 public class Client implements IClientCli, Runnable {
 
@@ -97,8 +98,7 @@ public class Client implements IClientCli, Runnable {
 	 *            the first argument is the name of the {@link Client} component
 	 */
 	public static void main(String[] args) {
-		Client client = new Client(args[0], new Config("client"), System.in,
-				System.out);
+		Client client = new Client(args[0], new Config("client"), System.in, System.out);
 		// TODO: start the client
 	}
 

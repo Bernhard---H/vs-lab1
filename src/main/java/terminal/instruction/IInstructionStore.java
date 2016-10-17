@@ -1,6 +1,6 @@
 package terminal.instruction;
 
-import terminal.model.CommandID;
+import terminal.model.Command;
 import terminal.model.IArguments;
 
 /**
@@ -12,6 +12,6 @@ public interface IInstructionStore {
     <T extends IArguments> void register(IInstruction<T> instruction);
 
 
-    <T extends IArguments> IInstruction<T> findInstruction(CommandID command);
+    <T extends IArguments> IInstruction<T> findInstruction(Command command);
 
 }
