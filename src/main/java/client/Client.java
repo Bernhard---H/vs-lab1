@@ -1,5 +1,6 @@
 package client;
 
+import concurrency.ThreadManager;
 import util.Config;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ public class Client implements IClientCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
+	private ThreadManager threadManager = new ThreadManager();
 
 	/**
 	 * @param componentName
@@ -100,6 +102,9 @@ public class Client implements IClientCli, Runnable {
 	public static void main(String[] args) {
 		Client client = new Client(args[0], new Config("client"), System.in, System.out);
 		// TODO: start the client
+
+		client.threadManager.execute(client);
+
 	}
 
 	// --- Commands needed for Lab 2. Please note that you do not have to

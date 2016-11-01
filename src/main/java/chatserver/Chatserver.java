@@ -1,10 +1,11 @@
 package chatserver;
 
+import concurrency.ThreadManager;
+import util.Config;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
-import util.Config;
 
 public class Chatserver implements IChatserverCli, Runnable {
 
@@ -12,6 +13,7 @@ public class Chatserver implements IChatserverCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
+    private ThreadManager threadManager = new ThreadManager();
 
 	/**
 	 * @param componentName
@@ -59,6 +61,9 @@ public class Chatserver implements IChatserverCli, Runnable {
 		Chatserver chatserver = new Chatserver(args[0],
 				new Config("chatserver"), System.in, System.out);
 		// TODO: start the chatserver
+
+        chatserver.threadManager.execute(chatserver);
+
 	}
 
 }
