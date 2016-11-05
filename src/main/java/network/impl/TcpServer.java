@@ -1,44 +1,17 @@
 package network.impl;
 
 import network.NetServer;
-import util.Config;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.MissingResourceException;
+import network.impl.tcpStates.InitState;
+import network.impl.tcpStates.State;
 
 /**
  * @author Bernhard Halbartschlager
  */
 public final class TcpServer implements NetServer {
 
-    /**
-     * cache config for all instances of the tcp server
-     */
-    private static Config config = null;
 
-    private int tcpPort;
+    private State currentState = new InitState();
 
-    private ServerSocket serverSocket;
-
-    public TcpServer() {
-        this.loadConfig();
-    }
-
-    private void setup() {
-
-        try {
-            this.serverSocket = new ServerSocket(this.tcpPort);
-            // enables thread to be interrupted
-            // 500ms ... half a second
-            this.serverSocket.setSoTimeout(500);
-        } catch (IOException e) {
-            // todo
-            e.printStackTrace();
-        }
-    }
 
     /**
      * When an object implementing interface <code>Runnable</code> is used
@@ -54,21 +27,18 @@ public final class TcpServer implements NetServer {
     @Override
     public void run() {
         try {
-            this.setup();
 
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(1000);
-                    Socket client = this.serverSocket.accept();
-                    // todo: do something with the connection
 
-                } catch (SocketTimeoutException e) {
-                    // ignore: check if thread is interrupted and try again
-                }
+            while (!Thread.currentThread().isInterrupted() && this.currentState != null) {
+                // run the action of the current state
+                this.currentState = this.currentState.run();
+
+
+
+
+
             }
 
-        } catch (InterruptedException e) {
-            // ignore
         } catch (Exception e) {
             // make sure exception doesn't get swallowed
             e.printStackTrace();
@@ -77,22 +47,7 @@ public final class TcpServer implements NetServer {
         }
     }
 
-    private void loadConfig() {
-        try {
-            if (config == null) {
-                // load
-                config = new Config("chatserver.properties");
-            }
 
-            this.tcpPort = config.getInt("tcp.port");
-        } catch (MissingResourceException e) {
-            // todo: new Config() failed   ||  could not find "tcp.port"
-            e.printStackTrace();
-        } catch (NumberFormatException e) {
-            // todo: failed to read port
-            e.printStackTrace();
-        }
-    }
 
 
     @Override
@@ -104,13 +59,9 @@ public final class TcpServer implements NetServer {
      * idempotent version of this.close()
      */
     private void _close() {
-        if (this.serverSocket != null) {
-            try {
-                this.serverSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            this.serverSocket = null;
+        if (this.currentState != null) {
+            this.currentState.close();
+            this.currentState = null;
         }
     }
 

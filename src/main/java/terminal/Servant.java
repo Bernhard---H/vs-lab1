@@ -39,4 +39,9 @@ public abstract class Servant {
 
     }
 
+
+    public void close(){
+
+    }
+
 }

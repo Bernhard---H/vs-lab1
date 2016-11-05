@@ -1,7 +1,7 @@
 package client;
 
-import concurrency.ThreadManager;
 import util.Config;
+import util.DependencyManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ public class Client implements IClientCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-	private ThreadManager threadManager = new ThreadManager();
+    private DependencyManager dm = new DependencyManager();
 
 	/**
 	 * @param componentName
@@ -34,6 +34,7 @@ public class Client implements IClientCli, Runnable {
 		this.userResponseStream = userResponseStream;
 
 		// TODO
+        this.dm.getThreadManager().execute(this);
 	}
 
 	@Override
@@ -102,8 +103,6 @@ public class Client implements IClientCli, Runnable {
 	public static void main(String[] args) {
 		Client client = new Client(args[0], new Config("client"), System.in, System.out);
 		// TODO: start the client
-
-		client.threadManager.execute(client);
 
 	}
 

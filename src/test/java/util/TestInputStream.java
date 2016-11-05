@@ -63,7 +63,7 @@ public class TestInputStream extends InputStream {
 	}
 
 	/**
-	 * Prepares the next line available for reading from it.
+	 * Prepares the run line available for reading from it.
 	 * <p/>
 	 * This method blocks until a line is available or the stream becomes closed.
 	 *
