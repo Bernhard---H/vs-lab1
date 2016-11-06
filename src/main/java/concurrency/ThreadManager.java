@@ -1,12 +1,14 @@
 package concurrency;
 
+import util.CloseMe;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ThreadManager {
+public final class ThreadManager implements CloseMe {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
@@ -15,10 +17,11 @@ public final class ThreadManager {
         this.executor.execute(runnable);
     }
 
-    public void shutdown() {
+
+
+    @Override
+    public void closeMe() {
         this.executor.shutdownNow();
     }
-
-
 
 }

@@ -1,7 +1,8 @@
 package client;
 
+import terminal.impl.ClientSessionManager;
 import util.Config;
-import util.DependencyManager;
+import util.ResourceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +15,7 @@ public class Client implements IClientCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-    private DependencyManager dm = new DependencyManager();
+    private ResourceManager rm;
 
 	/**
 	 * @param componentName
@@ -34,7 +35,8 @@ public class Client implements IClientCli, Runnable {
 		this.userResponseStream = userResponseStream;
 
 		// TODO
-        this.dm.getThreadManager().execute(this);
+		this.rm = new ResourceManager(new ClientSessionManager());
+        this.rm.getThreadManager().execute(this);
 	}
 
 	@Override

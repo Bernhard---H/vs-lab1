@@ -1,9 +1,11 @@
 package network.impl.tcpStates;
 
 import network.NetworkException;
+import network.impl.InnerServantException;
 import network.impl.TcpClientConnectException;
 import terminal.ServantException;
 import terminal.impl.ServerTcpServant;
+import util.ResourceManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,14 +25,16 @@ public final class WaitForClientState implements State {
 
 
     @Override
-    public State run() throws NetworkException {
+    public State run(ResourceManager rm) throws NetworkException {
 
         try {
             Thread.sleep(10000);
             Socket client = this.serverSocket.accept();
             // todo: do something with the connection
 
-            new ServerTcpServant(client);
+            ServerTcpServant servant = new ServerTcpServant(client);
+
+            rm.getSessionManager()
 
 
             return this;
@@ -44,7 +48,7 @@ public final class WaitForClientState implements State {
             this.close();
             return null;
         } catch (ServantException e) {
-
+            throw new InnerServantException("error within the servant", e);
         }
     }
 

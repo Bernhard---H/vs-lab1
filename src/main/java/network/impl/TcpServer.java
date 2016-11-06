@@ -3,14 +3,20 @@ package network.impl;
 import network.NetServer;
 import network.impl.tcpStates.InitState;
 import network.impl.tcpStates.State;
+import util.ResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
 public final class TcpServer implements NetServer {
 
-
     private State currentState = new InitState();
+
+    private ResourceManager rm;
+
+    public TcpServer(ResourceManager rm) {
+        this.rm = rm;
+    }
 
 
     /**
@@ -28,37 +34,24 @@ public final class TcpServer implements NetServer {
     public void run() {
         try {
 
-
             while (!Thread.currentThread().isInterrupted() && this.currentState != null) {
                 // run the action of the current state
-                this.currentState = this.currentState.run();
-
-
-
-
-
+                this.currentState = this.currentState.run(this.rm);
             }
 
         } catch (Exception e) {
             // make sure exception doesn't get swallowed
             e.printStackTrace();
         } finally {
-            this._close();
+            this.closeMe();
         }
     }
 
 
-
-
-    @Override
-    public void close() throws Exception {
-        this._close();
-    }
-
     /**
      * idempotent version of this.close()
      */
-    private void _close() {
+    public void closeMe() {
         if (this.currentState != null) {
             this.currentState.close();
             this.currentState = null;

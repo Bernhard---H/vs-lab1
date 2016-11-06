@@ -1,6 +1,7 @@
 package network.impl.tcpStates;
 
 import network.NetworkException;
+import util.ResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
@@ -13,7 +14,7 @@ public final class InitState implements State {
      * @throws NetworkException
      */
     @Override
-    public State run() throws NetworkException {
+    public State run(ResourceManager rm) throws NetworkException {
         return new SetupState();
     }
 
