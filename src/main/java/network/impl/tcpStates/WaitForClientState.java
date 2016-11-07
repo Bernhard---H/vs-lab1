@@ -34,7 +34,7 @@ public final class WaitForClientState implements State {
 
             ServerTcpServant servant = new ServerTcpServant(client);
 
-            rm.getSessionManager()
+            rm.getSessionManager();
 
 
             return this;

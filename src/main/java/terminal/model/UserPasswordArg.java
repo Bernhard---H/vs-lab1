@@ -3,12 +3,12 @@ package terminal.model;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class UsernamePasswordArg {
+public final class UserPasswordArg implements IArguments {
 
     private String username;
     private String password;
 
-    public UsernamePasswordArg(String username, String password) {
+    public UserPasswordArg(String username, String password) {
         this.username = username;
         this.password = password;
     }

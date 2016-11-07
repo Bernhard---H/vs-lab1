@@ -1,5 +1,6 @@
 package terminal.parser;
 
+import terminal.exceptions.ParseException;
 import terminal.model.IArguments;
 
 /**
@@ -8,6 +9,6 @@ import terminal.model.IArguments;
 public interface IArgumentsParser<T extends IArguments> {
 
 
-    T parse(String parameter);
+    T parse(String parameter) throws ParseException;
 
 }

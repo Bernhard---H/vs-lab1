@@ -1,9 +1,11 @@
-package terminal.exceptions;
+package terminal.exceptions.impl;
+
+import terminal.exceptions.ParseException;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class ParseException extends Exception {
+public final class ArgumentParseException extends ParseException {
 
     /**
      * Constructs a new exception with the specified detail message.  The
@@ -13,7 +15,7 @@ public abstract class ParseException extends Exception {
      * @param message the detail message. The detail message is saved for
      * later retrieval by the {@link #getMessage()} method.
      */
-    public ParseException(String message) {
+    public ArgumentParseException(String message) {
         super(message);
     }
 
@@ -31,7 +33,8 @@ public abstract class ParseException extends Exception {
      * unknown.)
      * @since 1.4
      */
-    public ParseException(String message, Throwable cause) {
+    public ArgumentParseException(String message, Throwable cause) {
         super(message, cause);
     }
+
 }

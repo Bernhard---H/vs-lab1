@@ -10,6 +10,7 @@ public final class ResourceManager implements CloseMe {
 
     private ThreadManager threadManager = null;
     private SessionManager sessionManager;
+    private String lastPublicMessage = null;
 
     public ResourceManager(SessionManager sessionManager) {
         assert sessionManager != null;
@@ -25,6 +26,15 @@ public final class ResourceManager implements CloseMe {
 
     public SessionManager getSessionManager() {
         return sessionManager;
+    }
+
+
+    public String getLastPublicMessage() {
+        return lastPublicMessage;
+    }
+
+    public void setLastPublicMessage(String lastPublicMessage) {
+        this.lastPublicMessage = lastPublicMessage;
     }
 
 

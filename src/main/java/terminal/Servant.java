@@ -7,15 +7,18 @@ import terminal.model.IArguments;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.ICommandParser;
 import terminal.exceptions.ParseException;
+import util.CloseMe;
+import util.ResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class Servant {
+public abstract class Servant implements CloseMe {
 
 
-    private IInstructionStore store = null;
+    protected IInstructionStore store = null;
     private ICommandParser parser = null;
+    private ResourceManager rm = null;
 
 
     public abstract void println(String msg);
@@ -34,14 +37,13 @@ public abstract class Servant {
         IArgumentsParser<T> argsParser = instruction.getArgumentsParser();
         T arguments = argsParser.parse(command.getParameter());
 
-        String result = instruction.execute(arguments);
+        String result = instruction.execute(arguments, this.rm);
         this.println(result);
 
     }
 
-
-    public void close(){
+    @Override
+    public void closeMe() {
 
     }
-
 }
