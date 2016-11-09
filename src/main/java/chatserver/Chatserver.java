@@ -1,9 +1,9 @@
 package chatserver;
 
-import concurrency.ThreadManager;
+import terminal.impl.ServerSessionManager;
 import util.Config;
+import util.ServerResourceManager;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 
@@ -13,7 +13,7 @@ public class Chatserver implements IChatserverCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-    private ThreadManager threadManager = new ThreadManager();
+    private ServerResourceManager rm;
 
 	/**
 	 * @param componentName
@@ -33,6 +33,7 @@ public class Chatserver implements IChatserverCli, Runnable {
 		this.userResponseStream = userResponseStream;
 
 		// TODO
+        this.rm = new ServerResourceManager(this, new ServerSessionManager());
 	}
 
 	@Override
@@ -41,13 +42,13 @@ public class Chatserver implements IChatserverCli, Runnable {
 	}
 
 	@Override
-	public String users() throws IOException {
+	public String users() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String exit() throws IOException {
+	public String exit() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -60,10 +61,9 @@ public class Chatserver implements IChatserverCli, Runnable {
 	public static void main(String[] args) {
 		Chatserver chatserver = new Chatserver(args[0],
 				new Config("chatserver"), System.in, System.out);
-		// TODO: start the chatserver
-
-        chatserver.threadManager.execute(chatserver);
-
+		// no idea how the test framework will start the chatserver
+		Thread thread = new Thread(chatserver);
+		thread.start();
 	}
 
 }

@@ -38,7 +38,6 @@ public class Client implements IClientCli, Runnable {
 
 		// TODO
 		this.rm = new ClientResourceManager(this, new ClientSessionManager());
-        this.rm.getThreadManager().execute(this);
 	}
 
 	@Override
@@ -115,8 +114,9 @@ public class Client implements IClientCli, Runnable {
 	 */
 	public static void main(String[] args) {
 		Client client = new Client(args[0], new Config("client"), System.in, System.out);
-		// TODO: start the client
-
+        // no idea how the test framework will start the client
+        Thread thread = new Thread(client);
+        thread.start();
 	}
 
 	// --- Commands needed for Lab 2. Please note that you do not have to
