@@ -7,13 +7,13 @@ import util.ResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public interface IInstruction<T extends IArguments> {
+public interface IInstruction<T extends IArguments, R extends ResourceManager> {
 
 
     String getName();
 
     IArgumentsParser<T> getArgumentsParser();
 
-    String execute(T args, ResourceManager rm);
+    String execute(T args, R rm);
 
 }

@@ -1,15 +1,17 @@
 package terminal.impl;
 
 import terminal.instruction.impl.*;
+import util.ClientResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ClientUserServant extends UserServant {
+public final class ClientUserServant extends UserServant<ClientResourceManager> {
 
+    public ClientUserServant(ClientResourceManager rm) {
+        super(rm);
 
-    public ClientUserServant() {
-        this.store = new InstructionStore();
+        this.store = new InstructionStore<>();
 
         this.store.register(new LoginInstruction());
         this.store.register(new LogoutInstruction());

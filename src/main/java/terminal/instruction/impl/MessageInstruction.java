@@ -1,15 +1,15 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IInstruction;
+import terminal.instruction.IClientInstruction;
 import terminal.model.PrivateMsgArg;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.impl.PrivateMsgParser;
-import util.ResourceManager;
+import util.ClientResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public final class MessageInstruction implements IInstruction<PrivateMsgArg> {
+public final class MessageInstruction implements IClientInstruction<PrivateMsgArg> {
 
     @Override
     public String getName() {
@@ -22,8 +22,8 @@ public final class MessageInstruction implements IInstruction<PrivateMsgArg> {
     }
 
     @Override
-    public String execute(PrivateMsgArg args, ResourceManager rm) {
-        return null;
+    public String execute(PrivateMsgArg args, ClientResourceManager rm) {
+        return rm.getClient().msg(args.getReceiver(), args.getMessage());
     }
 
 }

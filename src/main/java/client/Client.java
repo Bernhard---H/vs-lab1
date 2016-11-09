@@ -1,12 +1,14 @@
 package client;
 
 import terminal.impl.ClientSessionManager;
+import util.ClientResourceManager;
 import util.Config;
-import util.ResourceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 
 public class Client implements IClientCli, Runnable {
@@ -15,7 +17,7 @@ public class Client implements IClientCli, Runnable {
 	private Config config;
 	private InputStream userRequestStream;
 	private PrintStream userResponseStream;
-    private ResourceManager rm;
+    private ClientResourceManager rm;
 
 	/**
 	 * @param componentName
@@ -35,7 +37,7 @@ public class Client implements IClientCli, Runnable {
 		this.userResponseStream = userResponseStream;
 
 		// TODO
-		this.rm = new ResourceManager(new ClientSessionManager());
+		this.rm = new ClientResourceManager(this, new ClientSessionManager());
         this.rm.getThreadManager().execute(this);
 	}
 
@@ -45,55 +47,64 @@ public class Client implements IClientCli, Runnable {
 	}
 
 	@Override
-	public String login(String username, String password) throws IOException {
+	public String login(String username, String password) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String logout() throws IOException {
+	public String logout() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String send(String message) throws IOException {
+	public String send(String message) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String list() throws IOException {
+	public String list()  {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String msg(String username, String message) throws IOException {
+	public String msg(String username, String message)  {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String lookup(String username) throws IOException {
+	public String lookup(String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String register(String privateAddress) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public String register(String privateAddress) {
+        try {
+            InetAddress address = InetAddress.getByName(privateAddress);
+            return this.registerAddress(address);
+        } catch (UnknownHostException e) {
+            return "ERROR: unknown host";
+        }
 	}
-	
+
+	public String registerAddress(InetAddress privateAddress){
+		// todo: implement
+        return null;
+	}
+
+
 	@Override
-	public String lastMsg() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public String lastMsg() {
+		return this.rm.getLastPublicMessage();
 	}
 
 	@Override
-	public String exit() throws IOException {
+	public String exit() {
 		// TODO Auto-generated method stub
 		return null;
 	}

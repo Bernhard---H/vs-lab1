@@ -13,13 +13,16 @@ import util.ResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class Servant implements CloseMe {
+public abstract class Servant<R extends ResourceManager> implements CloseMe {
 
 
-    protected IInstructionStore store = null;
+    protected IInstructionStore<R> store = null;
     private ICommandParser parser = null;
-    private ResourceManager rm = null;
+    private R rm = null;
 
+    public Servant(R rm) {
+        this.rm = rm;
+    }
 
     public abstract void println(String msg);
 
@@ -28,7 +31,7 @@ public abstract class Servant implements CloseMe {
         assert input != null;
 
         Command command = this.parser.parse(input);
-        IInstruction<T> instruction = this.store.findInstruction(command);
+        IInstruction<T, R> instruction = this.store.findInstruction(command);
         if (instruction == null) {
             // todo: throw exception
             return;

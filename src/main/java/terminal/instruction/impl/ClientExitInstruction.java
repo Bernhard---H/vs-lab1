@@ -1,14 +1,14 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IInstruction;
+import terminal.instruction.IClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
-import util.ResourceManager;
+import util.ClientResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ClientExitInstruction implements IInstruction<SimpleArgument> {
+public final class ClientExitInstruction implements IClientInstruction<SimpleArgument> {
     @Override
     public String getName() {
         return "exit";
@@ -21,8 +21,7 @@ public final class ClientExitInstruction implements IInstruction<SimpleArgument>
     }
 
     @Override
-    public String execute(SimpleArgument args, ResourceManager rm) {
-        // todo: implement
-        return null;
+    public String execute(SimpleArgument args, ClientResourceManager rm) {
+        return rm.getClient().exit();
     }
 }

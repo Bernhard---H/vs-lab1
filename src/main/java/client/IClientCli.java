@@ -97,6 +97,7 @@ public interface IClientCli {
 	 */
 	String register(String privateAddress) throws IOException;
 
+
 	/**
 	 * Prints the last received message, considering only public
 	 * messages.
