@@ -8,10 +8,11 @@ import util.ResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ExitInstruction implements IInstruction<SimpleArgument> {
+public final class UsersInstruction implements IInstruction<SimpleArgument> {
+
     @Override
     public String getName() {
-        return "exit";
+        return "users";
     }
 
     @Override
@@ -25,4 +26,5 @@ public final class ExitInstruction implements IInstruction<SimpleArgument> {
         // todo: implement
         return null;
     }
+
 }

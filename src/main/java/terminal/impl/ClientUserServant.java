@@ -18,7 +18,7 @@ public final class ClientUserServant extends UserServant {
         this.store.register(new MessageInstruction());
         this.store.register(new ListInstruction());
         this.store.register(new LastMsgInstruction());
-        this.store.register(new ExitInstruction());
+        this.store.register(new ClientExitInstruction());
     }
 
 }
