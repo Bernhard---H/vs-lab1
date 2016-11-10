@@ -30,7 +30,7 @@ public final class CommandParser implements ICommandParser {
         Matcher matcher = pattern.matcher(input);
 
         if (!matcher.find() || matcher.groupCount() < 1 || matcher.group(1).length() < 1) {
-            throw new IllegalFormatException("Couldn't find command in input");
+            throw new IllegalFormatException("Couldn't find command in input, probably a syntax error");
         }
 
         name = matcher.group(1);

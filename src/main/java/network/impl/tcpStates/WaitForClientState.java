@@ -32,7 +32,7 @@ public final class WaitForClientState implements State {
             Socket client = this.serverSocket.accept();
             // todo: do something with the connection
 
-            ServerTcpServant servant = new ServerTcpServant(client);
+            ServerTcpServant servant = new ServerTcpServant(client, rm);
 
             rm.getSessionManager();
 

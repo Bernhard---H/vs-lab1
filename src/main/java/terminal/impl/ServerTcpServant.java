@@ -2,7 +2,7 @@ package terminal.impl;
 
 import terminal.Servant;
 import terminal.ServantException;
-import terminal.exceptions.ParseException;
+import util.ResourceManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,11 +20,13 @@ public final class ServerTcpServant extends Servant implements Runnable {
 
     private PrintWriter out;
 
-
     private Scanner scanner;
 
 
-    public ServerTcpServant(Socket socket) throws ServantException {
+
+
+    public ServerTcpServant(Socket socket, ResourceManager rm) throws ServantException {
+        super(rm);
         this.socket = socket;
         try {
             this.out = new PrintWriter(socket.getOutputStream(), true);
@@ -34,7 +36,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
         }
     }
 
-    @Override
+
     public void println(String msg) {
         out.println(msg);
     }
@@ -56,17 +58,17 @@ public final class ServerTcpServant extends Servant implements Runnable {
         try {
             while (this.scanner.hasNextLine()) {
                 String line = this.scanner.nextLine();
-                this.runInput(line);
+                // todo: this.runInput(line);
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
         } catch (IllegalStateException e) {
             // do nothing
+        } finally {
+            this.closeMe();
         }
     }
 
     @Override
-    public void closeMe() {
+    public synchronized void closeMe() {
         super.closeMe();
         if (this.scanner != null) {
             this.scanner.close();

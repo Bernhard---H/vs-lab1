@@ -44,8 +44,11 @@ public abstract class ResourceManager implements CloseMe {
         return userResponseStream;
     }
 
+    /**
+     * Waring: this will try to close everything
+     */
     @Override
-    public void closeMe() {
+    public synchronized void closeMe() {
         this.sessionManager.closeMe();
         if (this.threadManager != null) {
             this.threadManager.closeMe();

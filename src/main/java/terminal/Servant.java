@@ -8,7 +8,7 @@ import util.ResourceManager;
  */
 public abstract class Servant<R extends ResourceManager> implements CloseMe, Runnable {
 
-    private R rm = null;
+    protected R rm;
 
     public Servant(R rm) {
         assert rm != null;
@@ -17,9 +17,10 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
 
 
     @Override
-    public void closeMe() {
+    public synchronized void closeMe() {
         if (this.rm != null) {
             this.rm.closeMe();
+            this.rm = null;
         }
     }
 

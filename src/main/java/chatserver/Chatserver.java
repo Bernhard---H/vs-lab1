@@ -11,8 +11,6 @@ public class Chatserver implements IChatserverCli, Runnable {
 
 	private String componentName;
 	private Config config;
-	private InputStream userRequestStream;
-	private PrintStream userResponseStream;
     private ServerResourceManager rm;
 
 	/**
@@ -29,11 +27,9 @@ public class Chatserver implements IChatserverCli, Runnable {
 			InputStream userRequestStream, PrintStream userResponseStream) {
 		this.componentName = componentName;
 		this.config = config;
-		this.userRequestStream = userRequestStream;
-		this.userResponseStream = userResponseStream;
 
 		// TODO
-        this.rm = new ServerResourceManager(this, new ServerSessionManager());
+        this.rm = new ServerResourceManager(this, new ServerSessionManager(), userRequestStream, userResponseStream);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import terminal.impl.ClientSessionManager;
 import terminal.impl.ClientUserServant;
 import util.ClientResourceManager;
@@ -17,6 +19,7 @@ public class Client implements IClientCli, Runnable {
     private String componentName;
     private Config config;
     private ClientResourceManager rm;
+    private static final Log logger = LogFactory.getLog(Client.class);
 
     /**
      * @param componentName the name of the component - represented in the prompt
@@ -39,9 +42,13 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public void run() {
+        logger.info("start thread");
         // TODO
         ClientUserServant servant = new ClientUserServant(this.rm, this.componentName);
 
+        this.rm.getThreadManager().execute(servant);
+
+        logger.info("closing thread");
     }
 
     @Override
@@ -103,8 +110,8 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String exit() {
-        // TODO Auto-generated method stub
-        return null;
+        this.rm.closeMe();
+        return "see you soon";
     }
 
     /**

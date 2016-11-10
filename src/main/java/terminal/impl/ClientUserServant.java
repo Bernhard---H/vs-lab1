@@ -17,6 +17,7 @@ public final class ClientUserServant extends UserServant<ClientResourceManager> 
         this.store.register(new LogoutInstruction());
         this.store.register(new SendInstruction());
         this.store.register(new RegisterInstruction());
+        this.store.register(new LookupInstruction());
         this.store.register(new MessageInstruction());
         this.store.register(new ListInstruction());
         this.store.register(new LastMsgInstruction());

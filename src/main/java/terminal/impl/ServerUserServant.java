@@ -10,8 +10,8 @@ import util.ServerResourceManager;
  */
 public final class ServerUserServant extends UserServant<ServerResourceManager> {
 
-    public ServerUserServant(ServerResourceManager rm) {
-        super(rm);
+    public ServerUserServant(ServerResourceManager rm, String prompt) {
+        super(rm, prompt);
 
         this.store = new InstructionStore<>();
 
