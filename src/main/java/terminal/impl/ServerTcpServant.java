@@ -66,8 +66,8 @@ public final class ServerTcpServant extends Servant implements Runnable {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void closeMe() {
+        super.closeMe();
         if (this.scanner != null) {
             this.scanner.close();
             this.scanner = null;

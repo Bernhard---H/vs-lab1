@@ -8,8 +8,8 @@ import util.ClientResourceManager;
  */
 public final class ClientUserServant extends UserServant<ClientResourceManager> {
 
-    public ClientUserServant(ClientResourceManager rm) {
-        super(rm);
+    public ClientUserServant(ClientResourceManager rm, String prompt) {
+        super(rm, prompt);
 
         this.store = new InstructionStore<>();
 
@@ -23,4 +23,14 @@ public final class ClientUserServant extends UserServant<ClientResourceManager> 
         this.store.register(new ClientExitInstruction());
     }
 
+    @Override
+    protected void printPrompt() {
+        // todo: get current user name
+        String user = this.rm.getClientSessionManager().getLoggedinUser();
+        String print = "";
+        if (user != null && !user.isEmpty()) {
+            print = user + "@";
+        }
+        this.rm.getUserResponseStream().print(print + this.prompt + "> ");
+    }
 }
