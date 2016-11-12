@@ -11,11 +11,11 @@ import terminal.model.IArguments;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.ICommandParser;
 import terminal.parser.impl.CommandParser;
+import util.IO;
 import util.ResourceManager;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -23,11 +23,12 @@ import java.util.Scanner;
  */
 public abstract class UserServant<R extends ResourceManager> extends Servant<R> {
 
+    private static final Log logger = LogFactory.getLog(UserServant.class);
+
     protected IInstructionStore<R> store = null;
     private ICommandParser parser = null;
     protected String prompt;
 
-    private static final Log logger = LogFactory.getLog(UserServant.class);
 
     public UserServant(R rm, String prompt) {
         super(rm);
@@ -52,11 +53,11 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         logger.info("start thread");
         InputStream inputStream = this.rm.getUserRequestStream();
 
-        try (Scanner scanner = new Scanner(inputStream)) {
+        try (Scanner scanner = IO.toScanner(inputStream)) {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     this.printPrompt();
-                    String line = this.interruptableReadline(inputStream, scanner);
+                    String line = IO.interruptableReadln(inputStream, scanner);
                     this.runInput(line);
                 }
             } catch (InterruptedException e) {
@@ -72,23 +73,6 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         logger.info("closing thread");
     }
 
-    private String interruptableReadline(InputStream inputStream, Scanner scanner) throws InterruptedException, IOException {
-        while (!Thread.currentThread().isInterrupted()) {
-            if (inputStream.available() > 0) {
-                // can read something
-                try {
-                    // read line
-                    return scanner.nextLine();
-                } catch (NoSuchElementException e) {
-                    // not a full line jet
-                    Thread.sleep(100);
-                }
-            } else {
-                Thread.sleep(100);
-            }
-        }
-        throw new InterruptedException();
-    }
 
     protected void printPrompt() {
         this.rm.getUserResponseStream().print(this.prompt + "> ");

@@ -26,7 +26,6 @@ public final class ClientUserServant extends UserServant<ClientResourceManager> 
 
     @Override
     protected void printPrompt() {
-        // todo: get current user name
         String user = this.rm.getClientSessionManager().getLoggedinUser();
         String print = "";
         if (user != null && !user.isEmpty()) {

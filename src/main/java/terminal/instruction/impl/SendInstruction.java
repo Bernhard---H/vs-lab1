@@ -3,6 +3,7 @@ package terminal.instruction.impl;
 import terminal.instruction.IClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
+import terminal.parser.impl.SimpleParser;
 import util.ClientResourceManager;
 
 /**
@@ -18,7 +19,7 @@ public final class SendInstruction implements IClientInstruction<SimpleArgument>
     @Override
     public IArgumentsParser<SimpleArgument> getArgumentsParser() {
         // just use simple argument
-        return null;
+        return new SimpleParser();
     }
 
     @Override

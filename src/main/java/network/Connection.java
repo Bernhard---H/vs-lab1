@@ -1,6 +1,5 @@
 package network;
 
-import network.msg.Message;
 import util.CloseMe;
 
 /**
@@ -8,8 +7,8 @@ import util.CloseMe;
  */
 public interface Connection extends CloseMe {
 
-    void print(Message msg);
+    void print(String msg);
 
-    Message read() throws InterruptedException;
+    String read() throws InterruptedException;
 
 }
