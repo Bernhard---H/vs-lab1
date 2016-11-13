@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Bernhard Halbartschlager
+ *
+ * methods of this class is not 100% threadsafe to increase performance
  */
 public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue<E> {
 
@@ -37,7 +39,6 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public boolean add(E e) {
-        // not thread safe for performance
         if (this.closed) {
             throw new IllegalStateException("Queue has been closed");
         }
@@ -63,7 +64,6 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public boolean offer(E e) {
-        // not thread safe for performance
         if (this.closed) {
             throw new IllegalStateException("Queue has been closed");
         }
@@ -83,8 +83,7 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      * element prevents it from being added to this queue
      */
     @Override
-    public synchronized void put(E e) throws InterruptedException {
-        // not thread safe for performance
+    public void put(E e) throws InterruptedException {
         if (this.closed) {
             throw new IllegalStateException("Queue has been closed");
         }
@@ -111,7 +110,6 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
-        // not thread safe for performance
         if (this.closed) {
             throw new IllegalStateException("Queue has been closed");
         }
@@ -127,9 +125,8 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public E take() throws InterruptedException {
-        // not thread safe for performance
         if (this.closed) {
-            throw new IllegalStateException("Queue has been closed");
+            this.queue.offer(poison);
         }
         return queue.take().getData();
     }
@@ -148,9 +145,8 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-        // not thread safe for performance
         if (this.closed) {
-            throw new IllegalStateException("Queue has been closed");
+            this.queue.offer(poison);
         }
         return queue.poll(timeout, unit).getData();
     }
@@ -170,7 +166,6 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public int remainingCapacity() {
-        // not thread safe for performance
         if (this.closed) {
             return 0;
         }
@@ -227,6 +222,9 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public E remove() {
+        if (this.closed) {
+            this.queue.offer(poison);
+        }
         return queue.remove().getData();
     }
 
@@ -238,6 +236,9 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      */
     @Override
     public E poll() {
+        if (this.closed) {
+            this.queue.offer(poison);
+        }
         return queue.poll().getData();
     }
 
@@ -275,7 +276,7 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
     @Override
     public synchronized int size() {
         if (this.closed) {
-            return this.queue.size() - 1;
+            throw new IllegalStateException("BlockingQueue is closed");
         }
         return this.queue.size();
     }

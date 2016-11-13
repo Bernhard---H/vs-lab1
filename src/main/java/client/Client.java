@@ -1,17 +1,19 @@
 package client;
 
+import network.NetworkException;
+import network.model.Address;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import terminal.exceptions.ParseException;
 import terminal.impl.ClientSessionManager;
 import terminal.impl.ClientUserServant;
+import terminal.parser.impl.IpPortParser;
 import util.ClientResourceManager;
 import util.Config;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 
 public class Client implements IClientCli, Runnable {
@@ -19,6 +21,7 @@ public class Client implements IClientCli, Runnable {
     private String componentName;
     private Config config;
     private ClientResourceManager rm;
+    private ClientUserServant servant = null;
     private static final Log logger = LogFactory.getLog(Client.class);
 
     /**
@@ -37,16 +40,16 @@ public class Client implements IClientCli, Runnable {
         //this.userResponseStream = userResponseStream;
 
         // TODO
-        this.rm = new ClientResourceManager(this, new ClientSessionManager(), userRequestStream, userResponseStream);
+        this.rm = new ClientResourceManager(this, new ClientSessionManager(), this.config, userRequestStream, userResponseStream);
     }
 
     @Override
     public void run() {
         logger.info("start thread");
         // TODO
-        ClientUserServant servant = new ClientUserServant(this.rm, this.componentName);
+        this.servant = new ClientUserServant(this.rm, this.componentName);
 
-        this.rm.getThreadManager().execute(servant);
+        this.rm.getThreadManager().execute(this.servant);
 
         logger.info("closing thread");
     }
@@ -54,19 +57,20 @@ public class Client implements IClientCli, Runnable {
     @Override
     public String login(String username, String password) {
         // TODO Auto-generated method stub
-        return null;
+        return this.sendToServer("!login " + username + " " + password);
     }
 
     @Override
     public String logout() {
         // TODO Auto-generated method stub
-        return null;
+        return this.sendToServer("!logout");
     }
+
 
     @Override
     public String send(String message) {
         // TODO Auto-generated method stub
-        return null;
+        return this.sendToServer("!msg " + message);
     }
 
     @Override
@@ -84,20 +88,20 @@ public class Client implements IClientCli, Runnable {
     @Override
     public String lookup(String username) {
         // TODO Auto-generated method stub
-        return null;
+        return this.sendToServer("!lookup " + username);
     }
 
     @Override
     public String register(String privateAddress) {
         try {
-            InetAddress address = InetAddress.getByName(privateAddress);
-            return this.registerAddress(address);
-        } catch (UnknownHostException e) {
+            IpPortParser parser = new IpPortParser();
+            return this.registerAddress(parser.parse(privateAddress).getAddress());
+        } catch (ParseException e) {
             return "ERROR: unknown host";
         }
     }
 
-    public String registerAddress(InetAddress privateAddress) {
+    public String registerAddress(Address privateAddress) {
         // todo: implement
         return null;
     }
@@ -131,6 +135,19 @@ public class Client implements IClientCli, Runnable {
     public String authenticate(String username) throws IOException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+
+    private String sendToServer(String msg) {
+        try {
+            this.rm.getConnectionManager().getServer().print(msg);
+            return this.rm.getConnectionManager().getServer().read();
+        } catch (NetworkException e) {
+            return "ERROR: " + e.getMessage();
+        } catch (InterruptedException e) {
+            // ignore and shutdown
+        }
+        return "";
     }
 
 }

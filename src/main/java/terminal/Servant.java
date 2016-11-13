@@ -15,6 +15,11 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
         this.rm = rm;
     }
 
+    public abstract void println(String msg);
+
+    public abstract void printError(String e);
+
+    public abstract void printError(Exception e);
 
     @Override
     public synchronized void closeMe() {

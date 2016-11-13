@@ -1,19 +1,19 @@
 package terminal.model;
 
-import java.net.InetAddress;
+import network.model.Address;
 
 /**
  * @author Bernhard Halbartschlager
  */
 public final class IpAddressArg implements IArguments {
 
-    private InetAddress address;
+    private Address address;
 
-    public IpAddressArg(InetAddress address) {
+    public IpAddressArg(Address address) {
         this.address = address;
     }
 
-    public InetAddress getAddress() {
+    public Address getAddress() {
         return address;
     }
 

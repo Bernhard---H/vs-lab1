@@ -1,6 +1,7 @@
 package util;
 
 import client.Client;
+import network.ClientConnectionManager;
 import terminal.impl.ClientSessionManager;
 
 import java.io.InputStream;
@@ -14,12 +15,16 @@ public final class ClientResourceManager extends ResourceManager {
     private Client client;
     private String lastPublicMessage = null;
     private ClientSessionManager clientSessionManager;
+    private Config config;
+    private ClientConnectionManager connectionManager = new ClientConnectionManager(this);
 
-    public ClientResourceManager(Client client, ClientSessionManager sessionManager, InputStream userRequestStream, PrintStream userResponseStream) {
+    public ClientResourceManager(Client client, ClientSessionManager sessionManager, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
         super(sessionManager, userRequestStream, userResponseStream);
         assert client != null;
+        assert config != null;
         this.client = client;
         this.clientSessionManager = sessionManager;
+        this.config = config;
     }
 
     public Client getClient() {
@@ -38,4 +43,11 @@ public final class ClientResourceManager extends ResourceManager {
         return clientSessionManager;
     }
 
+    public ClientConnectionManager getConnectionManager() {
+        return connectionManager;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
 }
