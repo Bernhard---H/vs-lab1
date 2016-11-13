@@ -78,16 +78,17 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         this.rm.getUserResponseStream().print(this.prompt + "> ");
     }
 
-    public void println(String msg) {
+    protected void println(String msg) {
         this.rm.getUserResponseStream().println(msg);
     }
 
-    public void printError(String e) {
+    protected void printError(String e) {
         this.rm.getUserResponseStream().println("ERROR: " + e);
     }
 
-    public void printError(Exception e) {
+    protected void printError(Exception e) {
         this.rm.getUserResponseStream().println("ERROR: " + e.getMessage());
+        logger.error(e);
     }
 
     protected <T extends IArguments> void runInput(String input) {

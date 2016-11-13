@@ -1,7 +1,9 @@
 package network;
 
 import network.impl.TcpClient;
+import network.impl.UdpClient;
 import network.model.Address;
+import network.msg.ConnectionPlus;
 import util.ClientResourceManager;
 import util.CloseMe;
 
@@ -13,7 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class ClientConnectionManager implements CloseMe {
 
-    private Connection toServer = null;
+    private NetClient toServerTcp = null;
+    private NetClient toServerUdp = null;
     private Lock serverLock = new ReentrantLock();
     private ClientResourceManager rm;
 
@@ -21,29 +24,48 @@ public final class ClientConnectionManager implements CloseMe {
         this.rm = rm;
     }
 
-    private void createServerConnection() throws NetworkException {
+    private void createTcpConnection() throws NetworkException {
         String host = this.rm.getConfig().getString("chatserver.host");
         int port = this.rm.getConfig().getInt("chatserver.tcp.port");
-        TcpClient client = new TcpClient(new Address(host, port));
-        this.rm.getThreadManager().execute(client);
-        this.toServer = client;
+        this.toServerTcp = new TcpClient(new Address(host, port));
+        this.rm.getThreadManager().execute(this.toServerTcp);
     }
 
-    public Connection getServer() throws NetworkException {
+    public Connection getTcpConnection() throws NetworkException {
         this.serverLock.lock();
-        if (this.toServer == null) {
-            this.createServerConnection();
+        if (this.toServerTcp == null || this.toServerTcp.isClosed()) {
+            this.createTcpConnection();
         }
         this.serverLock.unlock();
-        return toServer;
+        return toServerTcp;
+    }
+
+    private void createUdpConnection() throws NetworkException {
+        String host = this.rm.getConfig().getString("chatserver.host");
+        int port = this.rm.getConfig().getInt("chatserver.udp.port");
+        this.toServerUdp = new UdpClient(new Address(host, port));
+        this.rm.getThreadManager().execute(this.toServerUdp);
+    }
+
+    public ConnectionPlus getUdpConnection() throws NetworkException {
+        this.serverLock.lock();
+        if (this.toServerUdp == null || this.toServerUdp.isClosed()) {
+            this.createUdpConnection();
+        }
+        this.serverLock.unlock();
+        return this.toServerUdp;
     }
 
     @Override
     public void closeMe() {
         this.serverLock.lock();
-        if (this.toServer != null) {
-            this.toServer.closeMe();
-            this.toServer = null;
+        if (this.toServerTcp != null) {
+            this.toServerTcp.closeMe();
+            this.toServerTcp = null;
+        }
+        if (this.toServerUdp != null) {
+            this.toServerUdp.closeMe();
+            this.toServerUdp = null;
         }
         this.serverLock.unlock();
     }

@@ -5,6 +5,8 @@ import terminal.SessionManager;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Bernhard Halbartschlager
@@ -15,6 +17,8 @@ public abstract class ResourceManager implements CloseMe {
     private SessionManager sessionManager;
     private InputStream userRequestStream;
     private PrintStream userResponseStream;
+
+    protected Lock closeMeLock = new ReentrantLock();
 
     public ResourceManager(SessionManager sessionManager, InputStream userRequestStream, PrintStream userResponseStream) {
         assert sessionManager != null;
@@ -48,12 +52,14 @@ public abstract class ResourceManager implements CloseMe {
      * Waring: this will try to close everything
      */
     @Override
-    public synchronized void closeMe() {
+    public  void closeMe() {
+        this.closeMeLock.lock();
         this.sessionManager.closeMe();
         if (this.threadManager != null) {
             this.threadManager.closeMe();
             this.threadManager = null;
         }
+        this.closeMeLock.unlock();
     }
 
 }

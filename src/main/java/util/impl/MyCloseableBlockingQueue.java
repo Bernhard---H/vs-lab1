@@ -1,5 +1,6 @@
 package util.impl;
 
+import util.BlockingQueueTimeoutException;
 import util.CloseableBlockingQueue;
 
 import java.util.Collection;
@@ -11,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Bernhard Halbartschlager
  *
- * methods of this class is not 100% threadsafe to increase performance
+ *         methods of this class is not 100% threadsafe to increase performance
  */
 public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue<E> {
 
@@ -144,11 +145,15 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
-    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
+    public E poll(long timeout, TimeUnit unit) throws InterruptedException, BlockingQueueTimeoutException {
         if (this.closed) {
             this.queue.offer(poison);
         }
-        return queue.poll(timeout, unit).getData();
+        Container c = queue.poll(timeout, unit);
+        if (c == null) {
+            throw new BlockingQueueTimeoutException("timeout: " + timeout + " " + unit);
+        }
+        return c.getData();
     }
 
     /**

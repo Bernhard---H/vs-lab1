@@ -1,5 +1,7 @@
 package terminal;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import util.CloseMe;
 import util.ResourceManager;
 
@@ -8,6 +10,8 @@ import util.ResourceManager;
  */
 public abstract class Servant<R extends ResourceManager> implements CloseMe, Runnable {
 
+    private static final Log logger = LogFactory.getLog(Servant.class);
+
     protected R rm;
 
     public Servant(R rm) {
@@ -15,17 +19,13 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
         this.rm = rm;
     }
 
-    public abstract void println(String msg);
-
-    public abstract void printError(String e);
-
-    public abstract void printError(Exception e);
-
     @Override
     public synchronized void closeMe() {
         if (this.rm != null) {
-            this.rm.closeMe();
+            // just in case I ever create a circle
+            CloseMe closeable = this.rm;
             this.rm = null;
+            closeable.closeMe();
         }
     }
 

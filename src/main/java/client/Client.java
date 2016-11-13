@@ -8,12 +8,14 @@ import terminal.exceptions.ParseException;
 import terminal.impl.ClientSessionManager;
 import terminal.impl.ClientUserServant;
 import terminal.parser.impl.IpPortParser;
+import util.BlockingQueueTimeoutException;
 import util.ClientResourceManager;
 import util.Config;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.concurrent.TimeUnit;
 
 
 public class Client implements IClientCli, Runnable {
@@ -75,8 +77,17 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String list() {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            this.rm.getConnectionManager().getUdpConnection().print("!list");
+            return this.rm.getConnectionManager().getUdpConnection().read(5, TimeUnit.SECONDS);
+        } catch (NetworkException e) {
+            return "ERROR: " + e.getMessage();
+        } catch (BlockingQueueTimeoutException e) {
+            return "ERROR: request ran into a timeout: " + e.getMessage();
+        } catch (InterruptedException e) {
+            // ignore and shutdown
+        }
+        return "";
     }
 
     @Override
@@ -87,7 +98,6 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String lookup(String username) {
-        // TODO Auto-generated method stub
         return this.sendToServer("!lookup " + username);
     }
 
@@ -140,8 +150,8 @@ public class Client implements IClientCli, Runnable {
 
     private String sendToServer(String msg) {
         try {
-            this.rm.getConnectionManager().getServer().print(msg);
-            return this.rm.getConnectionManager().getServer().read();
+            this.rm.getConnectionManager().getTcpConnection().print(msg);
+            return this.rm.getConnectionManager().getTcpConnection().read();
         } catch (NetworkException e) {
             return "ERROR: " + e.getMessage();
         } catch (InterruptedException e) {

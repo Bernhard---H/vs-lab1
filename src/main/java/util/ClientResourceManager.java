@@ -50,4 +50,16 @@ public final class ClientResourceManager extends ResourceManager {
     public Config getConfig() {
         return config;
     }
+
+    /**
+     * Waring: this will try to close everything
+     */
+    @Override
+    public void closeMe() {
+        this.closeMeLock.lock();
+        super.closeMe();
+
+        this.connectionManager.closeMe();
+        this.closeMeLock.unlock();
+    }
 }

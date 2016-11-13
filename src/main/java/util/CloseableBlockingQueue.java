@@ -20,7 +20,7 @@ public interface CloseableBlockingQueue<E> extends CloseMe {
 
     E poll();
 
-    E poll(long timeout, TimeUnit unit) throws InterruptedException;
+    E poll(long timeout, TimeUnit unit) throws InterruptedException, BlockingQueueTimeoutException;
 
     E element();
 

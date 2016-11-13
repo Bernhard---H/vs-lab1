@@ -7,7 +7,7 @@ import util.CloseMe;
  */
 public interface Connection extends CloseMe {
 
-    void print(String msg);
+    void print(String msg) throws NetworkException;
 
     String read() throws InterruptedException;
 

@@ -1,10 +1,11 @@
-package network;
+package network.impl;
+
+import network.NetworkException;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class NetworkException extends Exception {
-
+public final class UdpClientException extends NetworkException {
     /**
      * Constructs a new exception with the specified detail message and
      * cause.  <p>Note that the detail message associated with
@@ -19,19 +20,7 @@ public abstract class NetworkException extends Exception {
      * unknown.)
      * @since 1.4
      */
-    public NetworkException(String message, Throwable cause) {
+    public UdpClientException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    /**
-     * Constructs a new exception with the specified detail message.  The
-     * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     *
-     * @param message the detail message. The detail message is saved for
-     * later retrieval by the {@link #getMessage()} method.
-     */
-    public NetworkException(String message) {
-        super(message);
     }
 }
