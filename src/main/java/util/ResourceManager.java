@@ -56,8 +56,9 @@ public abstract class ResourceManager implements CloseMe {
         this.closeMeLock.lock();
         this.sessionManager.closeMe();
         if (this.threadManager != null) {
-            this.threadManager.closeMe();
+            CloseMe closeMe = this.threadManager;
             this.threadManager = null;
+            closeMe.closeMe();
         }
         this.closeMeLock.unlock();
     }

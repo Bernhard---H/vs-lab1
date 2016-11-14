@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Bernhard Halbartschlager
+ *
+ * throws IllegalStateException if TcpClient.closeMe() has been called
  */
 public final class TcpClient implements NetClient {
 
@@ -30,6 +32,11 @@ public final class TcpClient implements NetClient {
     private Scanner inputScanner;
     private CloseableBlockingQueue<String> msgQueue = new MyCloseableBlockingQueue<>();
 
+    /**
+     * construct actual tcp client for Client.java
+     * @param address
+     * @throws NetworkException
+     */
     public TcpClient(Address address) throws NetworkException {
         assert address != null;
         try {
@@ -37,6 +44,14 @@ public final class TcpClient implements NetClient {
         } catch (IOException e) {
             throw new TcpClientException("failed to create socket", e);
         }
+    }
+
+    /**
+     * misuse for tcp server after connection has been established
+     * @param socket
+     */
+    public TcpClient(Socket socket) {
+        this.socket = socket;
     }
 
     @Override

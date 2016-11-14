@@ -1,7 +1,7 @@
 package network.impl.tcpStates;
 
 import network.NetworkException;
-import util.ResourceManager;
+import util.ServerResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
@@ -9,7 +9,7 @@ import util.ResourceManager;
 public interface State {
 
 
-    State run(ResourceManager rm) throws NetworkException;
+    State run(ServerResourceManager rm) throws NetworkException;
 
     /**
      * must be callable multiple times and must not throw exceptions

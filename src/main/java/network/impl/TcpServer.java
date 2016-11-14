@@ -3,7 +3,7 @@ package network.impl;
 import network.NetServer;
 import network.impl.tcpStates.InitState;
 import network.impl.tcpStates.State;
-import util.ResourceManager;
+import util.ServerResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
@@ -12,9 +12,9 @@ public final class TcpServer implements NetServer {
 
     private State currentState = new InitState();
 
-    private ResourceManager rm;
+    private ServerResourceManager rm;
 
-    public TcpServer(ResourceManager rm) {
+    public TcpServer(ServerResourceManager rm) {
         this.rm = rm;
     }
 

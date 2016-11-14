@@ -1,6 +1,5 @@
-package network.msg;
+package network;
 
-import network.Connection;
 import util.BlockingQueueTimeoutException;
 
 import java.util.concurrent.TimeUnit;
@@ -10,6 +9,8 @@ import java.util.concurrent.TimeUnit;
  */
 public interface ConnectionPlus extends Connection {
 
-    public String read(long timeout, TimeUnit unit) throws InterruptedException, BlockingQueueTimeoutException;
+    String read(long timeout, TimeUnit unit) throws InterruptedException, BlockingQueueTimeoutException;
+
+    boolean isClosed();
 
 }

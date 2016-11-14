@@ -1,5 +1,7 @@
 package terminal;
 
+import network.NetworkException;
+import terminal.model.Session;
 import util.CloseMe;
 
 import java.util.ArrayList;
@@ -14,10 +16,10 @@ public abstract class SessionManager implements CloseMe {
     private boolean closed = false;
 
 
-    public void broadcast(Session sender, String message) {
+    public void broadcast(Session sender, String message) throws NetworkException {
         for (Session session : this.openSessions) {
             if (session != sender) {
-                session.send(message);
+                session.getConnection().print(message);
             }
         }
     }

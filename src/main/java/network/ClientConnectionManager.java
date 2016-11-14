@@ -3,7 +3,6 @@ package network;
 import network.impl.TcpClient;
 import network.impl.UdpClient;
 import network.model.Address;
-import network.msg.ConnectionPlus;
 import util.ClientResourceManager;
 import util.CloseMe;
 
