@@ -20,11 +20,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Client implements IClientCli, Runnable {
 
+    private static final Log logger = LogFactory.getLog(Client.class);
+
     private String componentName;
     private Config config;
     private ClientResourceManager rm;
     private ClientUserServant servant = null;
-    private static final Log logger = LogFactory.getLog(Client.class);
 
     /**
      * @param componentName the name of the component - represented in the prompt

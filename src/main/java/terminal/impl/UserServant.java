@@ -117,9 +117,4 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         }
     }
 
-    @Override
-    public void closeMe() {
-        super.closeMe();
-    }
-
 }

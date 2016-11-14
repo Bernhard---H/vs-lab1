@@ -3,7 +3,7 @@ package network.impl.tcpStates;
 import network.NetworkException;
 import network.impl.TcpSetupException;
 import util.Config;
-import util.ResourceManager;
+import util.ServerResourceManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -53,7 +53,7 @@ public final class SetupState implements State {
     }
 
     @Override
-    public State run(ResourceManager rm) throws NetworkException {
+    public State run(ServerResourceManager rm) throws NetworkException {
         this.loadConfig();
         this.createSocket();
         return new WaitForClientState(this.serverSocket);

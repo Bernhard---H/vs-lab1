@@ -2,6 +2,7 @@ package util;
 
 import client.Client;
 import network.ClientConnectionManager;
+import terminal.SessionManager;
 import terminal.impl.ClientSessionManager;
 
 import java.io.InputStream;
@@ -12,19 +13,24 @@ import java.io.PrintStream;
  */
 public final class ClientResourceManager extends ResourceManager {
 
+    private SessionManager sessionManager;
     private Client client;
     private String lastPublicMessage = null;
     private ClientSessionManager clientSessionManager;
-    private Config config;
     private ClientConnectionManager connectionManager = new ClientConnectionManager(this);
 
     public ClientResourceManager(Client client, ClientSessionManager sessionManager, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
-        super(sessionManager, userRequestStream, userResponseStream);
+        super(config, userRequestStream, userResponseStream);
+
+        assert sessionManager != null;
         assert client != null;
-        assert config != null;
+        this.sessionManager = sessionManager;
         this.client = client;
         this.clientSessionManager = sessionManager;
-        this.config = config;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 
     public Client getClient() {
@@ -47,9 +53,6 @@ public final class ClientResourceManager extends ResourceManager {
         return connectionManager;
     }
 
-    public Config getConfig() {
-        return config;
-    }
 
     /**
      * Waring: this will try to close everything
@@ -59,6 +62,7 @@ public final class ClientResourceManager extends ResourceManager {
         this.closeMeLock.lock();
         super.closeMe();
 
+        this.sessionManager.closeMe();
         this.connectionManager.closeMe();
         this.closeMeLock.unlock();
     }

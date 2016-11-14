@@ -1,6 +1,9 @@
 package chatserver;
 
-import terminal.impl.ServerSessionManager;
+import network.ServerConnectionManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import terminal.impl.ServerUserServant;
 import util.Config;
 import util.ServerResourceManager;
 
@@ -9,57 +12,60 @@ import java.io.PrintStream;
 
 public class Chatserver implements IChatserverCli, Runnable {
 
-	private String componentName;
-	private Config config;
+    private static final Log logger = LogFactory.getLog(Chatserver.class);
+
+    private String componentName;
+    private Config config;
     private ServerResourceManager rm;
 
-	/**
-	 * @param componentName
-	 *            the name of the component - represented in the prompt
-	 * @param config
-	 *            the configuration to use
-	 * @param userRequestStream
-	 *            the input stream to read user input from
-	 * @param userResponseStream
-	 *            the output stream to write the console output to
-	 */
-	public Chatserver(String componentName, Config config,
-			InputStream userRequestStream, PrintStream userResponseStream) {
-		this.componentName = componentName;
-		this.config = config;
+    /**
+     * @param componentName the name of the component - represented in the prompt
+     * @param config the configuration to use
+     * @param userRequestStream the input stream to read user input from
+     * @param userResponseStream the output stream to write the console output to
+     */
+    public Chatserver(String componentName, Config config,
+                      InputStream userRequestStream, PrintStream userResponseStream) {
+        this.componentName = componentName;
+        this.config = config;
 
-		// TODO
-        this.rm = new ServerResourceManager(this, new ServerSessionManager(), userRequestStream, userResponseStream);
-	}
+        // TODO
+        this.rm = new ServerResourceManager(this, new ServerConnectionManager(this.rm), config, userRequestStream, userResponseStream);
+    }
 
-	@Override
-	public void run() {
-		// TODO
-	}
+    @Override
+    public void run() {
+        logger.info("start thread");
+        // TODO
+        ServerUserServant servant = new ServerUserServant(this.rm, this.componentName);
 
-	@Override
-	public String users() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        this.rm.getThreadManager().execute(servant);
 
-	@Override
-	public String exit() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        logger.info("closing thread");
+    }
 
-	/**
-	 * @param args
-	 *            the first argument is the name of the {@link Chatserver}
-	 *            component
-	 */
-	public static void main(String[] args) {
-		Chatserver chatserver = new Chatserver(args[0],
-				new Config("chatserver"), System.in, System.out);
-		// no idea how the test framework will start the chatserver
-		Thread thread = new Thread(chatserver);
-		thread.start();
-	}
+    @Override
+    public String users() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String exit() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
+     * @param args the first argument is the name of the {@link Chatserver}
+     * component
+     */
+    public static void main(String[] args) {
+        Chatserver chatserver = new Chatserver(args[0],
+            new Config("chatserver"), System.in, System.out);
+        // no idea how the test framework will start the chatserver
+        Thread thread = new Thread(chatserver);
+        thread.start();
+    }
 
 }

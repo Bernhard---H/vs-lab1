@@ -1,7 +1,6 @@
 package util;
 
 import concurrency.ThreadManager;
-import terminal.SessionManager;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -14,19 +13,19 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class ResourceManager implements CloseMe {
 
     private ThreadManager threadManager = null;
-    private SessionManager sessionManager;
     private InputStream userRequestStream;
     private PrintStream userResponseStream;
+    private Config config;
 
     protected Lock closeMeLock = new ReentrantLock();
 
-    public ResourceManager(SessionManager sessionManager, InputStream userRequestStream, PrintStream userResponseStream) {
-        assert sessionManager != null;
+    public ResourceManager(Config config, InputStream userRequestStream, PrintStream userResponseStream) {
         assert userRequestStream != null;
         assert userResponseStream != null;
-        this.sessionManager = sessionManager;
+        assert config != null;
         this.userRequestStream = userRequestStream;
         this.userResponseStream = userResponseStream;
+        this.config = config;
     }
 
     public ThreadManager getThreadManager() {
@@ -36,8 +35,9 @@ public abstract class ResourceManager implements CloseMe {
         return threadManager;
     }
 
-    public SessionManager getSessionManager() {
-        return sessionManager;
+
+    public Config getConfig() {
+        return config;
     }
 
     public InputStream getUserRequestStream() {
@@ -54,12 +54,13 @@ public abstract class ResourceManager implements CloseMe {
     @Override
     public  void closeMe() {
         this.closeMeLock.lock();
-        this.sessionManager.closeMe();
+
         if (this.threadManager != null) {
             CloseMe closeMe = this.threadManager;
             this.threadManager = null;
             closeMe.closeMe();
         }
+
         this.closeMeLock.unlock();
     }
 
