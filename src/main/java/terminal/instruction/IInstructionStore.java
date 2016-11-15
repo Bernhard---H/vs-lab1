@@ -2,17 +2,16 @@ package terminal.instruction;
 
 import terminal.model.Command;
 import terminal.model.IArguments;
-import util.ResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public interface IInstructionStore<R extends ResourceManager> {
+public interface IInstructionStore {
 
 
-    <T extends IArguments> void register(IInstruction<T, R> instruction);
+    <T extends IArguments> void register(IInstruction<T> instruction);
 
 
-    <T extends IArguments> IInstruction<T, R> findInstruction(Command command);
+    <T extends IArguments> IInstruction<T> findInstruction(Command command);
 
 }

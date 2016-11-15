@@ -1,6 +1,6 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IServerInstruction;
+import terminal.instruction.AbstractServerInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
 import util.ServerResourceManager;
@@ -8,7 +8,11 @@ import util.ServerResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class UsersInstruction implements IServerInstruction<SimpleArgument> {
+public final class UsersInstruction extends AbstractServerInstruction<SimpleArgument> {
+
+    public UsersInstruction(ServerResourceManager rm) {
+        super(rm);
+    }
 
     @Override
     public String getName() {
@@ -22,7 +26,7 @@ public final class UsersInstruction implements IServerInstruction<SimpleArgument
     }
 
     @Override
-    public String execute(SimpleArgument args, ServerResourceManager rm) {
+    public String execute(SimpleArgument args) {
         return rm.getServer().users();
     }
 

@@ -1,6 +1,6 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IClientInstruction;
+import terminal.instruction.AbstractClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
 import util.ClientResourceManager;
@@ -8,7 +8,12 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ExitClientInstruction implements IClientInstruction<SimpleArgument> {
+public final class ExitClientInstruction extends AbstractClientInstruction<SimpleArgument> {
+
+    public ExitClientInstruction(ClientResourceManager rm) {
+        super(rm);
+    }
+
     @Override
     public String getName() {
         return "exit";
@@ -21,7 +26,7 @@ public final class ExitClientInstruction implements IClientInstruction<SimpleArg
     }
 
     @Override
-    public String execute(SimpleArgument args, ClientResourceManager rm) {
+    public String execute(SimpleArgument args) {
         return rm.getClient().exit();
     }
 }

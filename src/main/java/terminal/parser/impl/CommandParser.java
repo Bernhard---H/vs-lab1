@@ -22,7 +22,7 @@ public final class CommandParser implements ICommandParser {
      * @throws ParseException
      */
     @Override
-    public Command parse(String input) throws ParseException {
+    public Command parse(String input) throws IllegalFormatException {
 
         String name, parameter = "";
 

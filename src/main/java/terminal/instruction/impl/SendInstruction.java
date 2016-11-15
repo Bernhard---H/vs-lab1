@@ -1,6 +1,6 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IClientInstruction;
+import terminal.instruction.AbstractClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.impl.SimpleParser;
@@ -9,7 +9,11 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class SendInstruction implements IClientInstruction<SimpleArgument> {
+public final class SendInstruction extends AbstractClientInstruction<SimpleArgument> {
+
+    public SendInstruction(ClientResourceManager rm) {
+        super(rm);
+    }
 
     @Override
     public String getName() {
@@ -23,7 +27,7 @@ public final class SendInstruction implements IClientInstruction<SimpleArgument>
     }
 
     @Override
-    public String execute(SimpleArgument args, ClientResourceManager rm) {
+    public String execute(SimpleArgument args) {
             return rm.getClient().send(args.getArgument());
     }
 

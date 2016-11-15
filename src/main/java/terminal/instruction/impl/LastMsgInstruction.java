@@ -1,6 +1,6 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IClientInstruction;
+import terminal.instruction.AbstractClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
 import util.ClientResourceManager;
@@ -8,7 +8,12 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class LastMsgInstruction implements IClientInstruction<SimpleArgument> {
+public final class LastMsgInstruction extends AbstractClientInstruction<SimpleArgument> {
+
+    public LastMsgInstruction(ClientResourceManager rm) {
+        super(rm);
+    }
+
     @Override
     public String getName() {
         return "lastMsg";
@@ -21,7 +26,7 @@ public final class LastMsgInstruction implements IClientInstruction<SimpleArgume
     }
 
     @Override
-    public String execute(SimpleArgument args, ClientResourceManager rm) {
+    public String execute(SimpleArgument args) {
         return rm.getClient().lastMsg();
     }
 }

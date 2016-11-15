@@ -1,33 +1,43 @@
 package terminal.instruction.impl;
 
 import terminal.SessionState;
-import terminal.instruction.IServerInstruction;
-import terminal.model.SimpleServerArgument;
+import terminal.instruction.AbstractServerInstruction;
+import terminal.model.Session;
+import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
-import terminal.parser.impl.SimpleServerParser;
+import terminal.parser.impl.SimpleParser;
 import util.ServerResourceManager;
 
 /**
  * @author Bernhard Halbartschlager
  */
-public final class SendTcpServerInstruction implements IServerInstruction<SimpleServerArgument> {
+public final class SendTcpServerInstruction extends AbstractServerInstruction<SimpleArgument> {
+
+    private Session session;
+
+    public SendTcpServerInstruction(ServerResourceManager rm, Session session) {
+        super(rm);
+        assert session != null;
+        this.session = session;
+    }
+
     @Override
     public String getName() {
         return "send";
     }
 
     @Override
-    public IArgumentsParser<SimpleServerArgument> getArgumentsParser() {
-        return new SimpleServerParser();
+    public IArgumentsParser<SimpleArgument> getArgumentsParser() {
+        return new SimpleParser();
     }
 
     @Override
-    public String execute(SimpleServerArgument args, ServerResourceManager rm) {
-        if (args.getSession().getState() != SessionState.AUTHENTICATED) {
+    public String execute(SimpleArgument args) {
+        if (this.session.getState() != SessionState.AUTHENTICATED) {
             return "unauthorized operation: please log in first";
         }
-        String msg = "!send "+ args.getSession().getName() + ": "+ args.getArgument();
-        rm.getConnectionManager().broadcast(args.getSession(), msg);
+        String msg = "!send "+ this.session.getName() + ": "+ args.getArgument();
+        rm.getConnectionManager().broadcast(this.session, msg);
         return "server finished broadcasting";
     }
 

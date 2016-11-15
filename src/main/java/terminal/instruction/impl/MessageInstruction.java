@@ -1,6 +1,6 @@
 package terminal.instruction.impl;
 
-import terminal.instruction.IClientInstruction;
+import terminal.instruction.AbstractClientInstruction;
 import terminal.model.PrivateMsgArg;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.impl.PrivateMsgParser;
@@ -9,7 +9,11 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class MessageInstruction implements IClientInstruction<PrivateMsgArg> {
+public final class MessageInstruction extends AbstractClientInstruction<PrivateMsgArg> {
+
+    public MessageInstruction(ClientResourceManager rm) {
+        super(rm);
+    }
 
     @Override
     public String getName() {
@@ -22,7 +26,7 @@ public final class MessageInstruction implements IClientInstruction<PrivateMsgAr
     }
 
     @Override
-    public String execute(PrivateMsgArg args, ClientResourceManager rm) {
+    public String execute(PrivateMsgArg args) {
         return rm.getClient().msg(args.getReceiver(), args.getMessage());
     }
 

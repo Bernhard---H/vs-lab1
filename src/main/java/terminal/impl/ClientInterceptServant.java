@@ -7,14 +7,9 @@ import org.apache.commons.logging.LogFactory;
 import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
-import terminal.instruction.IInstruction;
-import terminal.instruction.IInstructionStore;
+import terminal.exceptions.impl.ArgumentParseException;
 import terminal.instruction.impl.InstructionStore;
 import terminal.instruction.impl.SendClientInterceptInstruction;
-import terminal.model.Command;
-import terminal.model.IArguments;
-import terminal.parser.IArgumentsParser;
-import terminal.parser.ICommandParser;
 import terminal.parser.impl.CommandParser;
 import util.BlockingQueueTimeoutException;
 import util.ClientResourceManager;
@@ -31,18 +26,16 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
 
     private static final Log logger = LogFactory.getLog(ServerTcpServant.class);
 
-    private IInstructionStore<ClientResourceManager> store;
-    private ICommandParser parser;
     private ConnectionPlus connection;
     private CloseableBlockingQueue<String> msgQueue = new MyCloseableBlockingQueue<>();
 
-    public ClientInterceptServant(ConnectionPlus connection , ClientResourceManager rm) throws ServantException {
+    public ClientInterceptServant(ConnectionPlus connection, ClientResourceManager rm) throws ServantException {
         super(rm);
         assert connection != null;
         this.connection = connection;
 
-        this.store = new InstructionStore<>();
-        this.store.register(new SendClientInterceptInstruction());
+        this.store = new InstructionStore();
+        this.store.register(new SendClientInterceptInstruction(rm));
         this.parser = new CommandParser();
     }
 
@@ -63,17 +56,24 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
         logger.info("start thread");
 
         try {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    this.runInput(this.connection.read());
+            while (!Thread.currentThread().isInterrupted()) {
+                String input = this.connection.read();
+                try {
+                    this.println(this.runInput(input));
+                } catch (ArgumentParseException e) {
+                    // command parsed and found in list but wrong argument format
+                    this.printError(e);
+                } catch (ParseException e) {
+                    this.msgQueue.put(input);
                 }
-            } catch (InterruptedException e) {
-                // ingore and exit
             }
-        } catch (Exception e) {
-            // ignore
-            logger.info(e);
-        } finally {
+        } catch (InterruptedException e) {
+            // ingore and exit
+        }
+        catch (Exception e) {
+            logger.fatal(e);
+        }
+        finally {
             this.closeMe();
         }
         logger.info("closing thread");
@@ -91,33 +91,6 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
     private void printError(Exception e) {
         this.println("ERROR: " + e.getMessage());
         logger.error(e);
-    }
-
-    private  <T extends IArguments> void runInput(String input) throws InterruptedException {
-        assert input != null;
-
-        try {
-            Command command = this.parser.parse(input);
-            IInstruction<T, ClientResourceManager> instruction = this.store.findInstruction(command);
-            if (instruction == null) {
-                this.printError("no command '" + command.getName() + "' found");
-                return;
-            }
-
-            IArgumentsParser<T> argsParser = instruction.getArgumentsParser();
-            T arguments;
-            if (argsParser == null) {
-                arguments = null;
-            } else {
-                arguments = argsParser.parse(command.getParameter());
-            }
-
-            String result = instruction.execute(arguments, this.rm);
-            this.println(result);
-        } catch (ParseException e) {
-            // let something or someone else handle the msg
-            this.msgQueue.put(input);
-        }
     }
 
     @Override

@@ -6,16 +6,9 @@ import org.apache.commons.logging.LogFactory;
 import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
-import terminal.instruction.IInstruction;
-import terminal.instruction.IInstructionStore;
 import terminal.instruction.impl.InstructionStore;
 import terminal.instruction.impl.SendTcpServerInstruction;
-import terminal.model.Command;
-import terminal.model.IArguments;
-import terminal.model.IServerArguments;
 import terminal.model.Session;
-import terminal.parser.IArgumentsParser;
-import terminal.parser.ICommandParser;
 import terminal.parser.impl.CommandParser;
 import util.CloseMe;
 import util.ServerResourceManager;
@@ -23,12 +16,10 @@ import util.ServerResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ServerTcpServant extends Servant<ServerResourceManager> implements Runnable {
+public final class ServerTcpServant extends Servant implements Runnable {
 
     private static final Log logger = LogFactory.getLog(ServerTcpServant.class);
 
-    private IInstructionStore<ServerResourceManager> store;
-    private ICommandParser parser;
     private Session session;
 
 
@@ -37,8 +28,8 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
         assert session != null;
         this.session = session;
 
-        this.store = new InstructionStore<>();
-        this.store.register(new SendTcpServerInstruction());
+        this.store = new InstructionStore();
+        this.store.register(new SendTcpServerInstruction(rm, session));
         this.parser = new CommandParser();
     }
 
@@ -59,17 +50,22 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
         logger.info("start thread");
 
         try {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    this.runInput(this.session.getConnection().read());
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    String line = this.session.getConnection().read();
+                    this.println(this.runInput(line));
+                } catch (ParseException e) {
+                    printError(e);
+                    logger.info(e);
                 }
-            } catch (InterruptedException e) {
-                // ingore and exit
             }
-        } catch (Exception e) {
-            // ignore
-            logger.info(e);
-        } finally {
+        } catch (InterruptedException e) {
+            // ingore and exit
+        }
+        catch (Exception e) {
+            logger.fatal(e);
+        }
+        finally {
             this.closeMe();
         }
         logger.info("closing thread");
@@ -79,8 +75,7 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
     protected void println(String msg) {
         try {
             this.session.getConnection().print(msg + "\n");
-        }
-        catch (NetworkException e) {
+        } catch (NetworkException e) {
             // only relevant for udp connections
             assert false;
             logger.error(e);
@@ -96,34 +91,6 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
         logger.error(e);
     }
 
-    protected <T extends IArguments> void runInput(String input) {
-        assert input != null;
-
-        try {
-            Command command = this.parser.parse(input);
-            IInstruction<T, ServerResourceManager> instruction = this.store.findInstruction(command);
-            if (instruction == null) {
-                this.printError("no command '" + command.getName() + "' found");
-                return;
-            }
-
-            IArgumentsParser<T> argsParser = instruction.getArgumentsParser();
-            T arguments;
-            if (argsParser == null) {
-                arguments = null;
-            } else {
-                arguments = argsParser.parse(command.getParameter());
-                if (arguments instanceof IServerArguments) {
-                    ((IServerArguments) arguments).setSession(session);
-                }
-            }
-
-            String result = instruction.execute(arguments, this.rm);
-            this.println(result);
-        } catch (ParseException e) {
-            this.printError(e);
-        }
-    }
 
     @Override
     public synchronized void closeMe() {
