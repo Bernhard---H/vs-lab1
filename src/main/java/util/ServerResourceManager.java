@@ -14,12 +14,11 @@ public final class ServerResourceManager extends ResourceManager {
     private Chatserver server;
     private ServerConnectionManager connectionManager;
 
-    public ServerResourceManager(Chatserver server, ServerConnectionManager connectionManager,Config config, InputStream userRequestStream, PrintStream userResponseStream) {
+    public ServerResourceManager(Chatserver server, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
         super(config, userRequestStream, userResponseStream);
         assert server != null;
-        assert connectionManager != null;
         this.server = server;
-        this.connectionManager = connectionManager;
+        this.connectionManager = new ServerConnectionManager(this);
     }
 
     public Chatserver getServer() {

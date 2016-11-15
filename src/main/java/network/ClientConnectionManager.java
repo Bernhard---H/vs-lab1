@@ -30,7 +30,7 @@ public final class ClientConnectionManager implements CloseMe {
         this.rm.getThreadManager().execute(this.toServerTcp);
     }
 
-    public Connection getTcpConnection() throws NetworkException {
+    public ConnectionPlus getTcpConnection() throws NetworkException {
         this.serverLock.lock();
         if (this.toServerTcp == null || this.toServerTcp.isClosed()) {
             this.createTcpConnection();

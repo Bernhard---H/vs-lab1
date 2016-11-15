@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,6 +32,7 @@ public final class TcpClient implements NetClient {
     private InputStream inputStream;
     private Scanner inputScanner;
     private CloseableBlockingQueue<String> msgQueue = new MyCloseableBlockingQueue<>();
+    private Semaphore bootSemaphore = new Semaphore(0);
 
     /**
      * construct actual tcp client for Client.java
@@ -56,8 +58,16 @@ public final class TcpClient implements NetClient {
 
     @Override
     public void print(String msg) {
+        try {
+            // wait for TcpClient to finish booting
+            this.bootSemaphore.acquire();
+            this.bootSemaphore.release();
+        } catch (InterruptedException e) {
+            logger.debug(e);
+            return;
+        }
         if (this.out == null) {
-            throw new IllegalStateException("Connection has not been started jet or has been closed");
+            throw new IllegalStateException("Connection has already been closed");
         }
         this.out.println(msg);
     }
@@ -90,6 +100,9 @@ public final class TcpClient implements NetClient {
             this.out = new PrintWriter(this.socket.getOutputStream(), true);
             this.inputStream = this.socket.getInputStream();
             this.inputScanner = IO.toScanner(this.inputStream);
+
+            // END of setup
+            this.bootSemaphore.release(Integer.MAX_VALUE);
 
             try {
                 while (!Thread.currentThread().isInterrupted()) {

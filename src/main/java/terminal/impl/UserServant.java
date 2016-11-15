@@ -93,6 +93,9 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
 
     protected <T extends IArguments> void runInput(String input) {
         assert input != null;
+        if (input.trim().isEmpty()) {
+            return;
+        }
 
         try {
             Command command = this.parser.parse(input);

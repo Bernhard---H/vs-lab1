@@ -1,8 +1,12 @@
 package network.impl;
 
 import network.NetServer;
+import network.NetworkException;
 import network.impl.tcpStates.InitState;
 import network.impl.tcpStates.State;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import util.CloseMe;
 import util.ServerResourceManager;
 
 /**
@@ -10,8 +14,9 @@ import util.ServerResourceManager;
  */
 public final class TcpServer implements NetServer {
 
-    private State currentState = new InitState();
+    private static final Log logger = LogFactory.getLog(TcpServer.class);
 
+    private State currentState = new InitState();
     private ServerResourceManager rm;
 
     public TcpServer(ServerResourceManager rm) {
@@ -32,6 +37,7 @@ public final class TcpServer implements NetServer {
      */
     @Override
     public void run() {
+        logger.info("start thread");
         try {
 
             while (!Thread.currentThread().isInterrupted() && this.currentState != null) {
@@ -39,22 +45,24 @@ public final class TcpServer implements NetServer {
                 this.currentState = this.currentState.run(this.rm);
             }
 
-        } catch (Exception e) {
-            // make sure exception doesn't get swallowed
-            e.printStackTrace();
+        } catch (NetworkException e) {
+            logger.fatal("Network exception in tcp server",e);
         } finally {
             this.closeMe();
         }
+        logger.info("closing thread");
     }
 
 
-    /**
-     * idempotent version of this.close()
-     */
     public void closeMe() {
         if (this.currentState != null) {
-            this.currentState.close();
+            this.currentState.closeMe();
             this.currentState = null;
+        }
+        if (this.rm != null) {
+            CloseMe closeMe = this.rm;
+            this.rm = null;
+            closeMe.closeMe();
         }
     }
 

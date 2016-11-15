@@ -1,6 +1,6 @@
 package chatserver;
 
-import network.ServerConnectionManager;
+import network.impl.TcpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import terminal.impl.ServerUserServant;
@@ -30,16 +30,19 @@ public class Chatserver implements IChatserverCli, Runnable {
         this.config = config;
 
         // TODO
-        this.rm = new ServerResourceManager(this, new ServerConnectionManager(this.rm), config, userRequestStream, userResponseStream);
+        this.rm = new ServerResourceManager(this, config, userRequestStream, userResponseStream);
     }
 
     @Override
     public void run() {
         logger.info("start thread");
         // TODO
-        ServerUserServant servant = new ServerUserServant(this.rm, this.componentName);
 
+        ServerUserServant servant = new ServerUserServant(this.rm, this.componentName);
         this.rm.getThreadManager().execute(servant);
+
+        TcpServer tcpServer = new TcpServer(this.rm);
+        this.rm.getThreadManager().execute(tcpServer);
 
         logger.info("closing thread");
     }
@@ -52,8 +55,10 @@ public class Chatserver implements IChatserverCli, Runnable {
 
     @Override
     public String exit() {
-        // TODO Auto-generated method stub
-        return null;
+        // tell clients to shutdown
+        this.rm.getConnectionManager().broadcast(null, "!exit");
+        this.rm.closeMe();
+        return "see you soon";
     }
 
     /**

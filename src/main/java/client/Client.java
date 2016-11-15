@@ -39,8 +39,6 @@ public class Client implements IClientCli, Runnable {
         assert userResponseStream != null;
         this.componentName = componentName;
         this.config = config;
-        //this.userRequestStream = userRequestStream;
-        //this.userResponseStream = userResponseStream;
 
         // TODO
         this.rm = new ClientResourceManager(this, new ClientSessionManager(), this.config, userRequestStream, userResponseStream);
@@ -72,8 +70,7 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String send(String message) {
-        // TODO Auto-generated method stub
-        return this.sendToServer("!msg " + message);
+        return this.sendToServer("!send " + message);
     }
 
     @Override
@@ -152,9 +149,13 @@ public class Client implements IClientCli, Runnable {
     private String sendToServer(String msg) {
         try {
             this.rm.getConnectionManager().getTcpConnection().print(msg);
-            return this.rm.getConnectionManager().getTcpConnection().read();
+            return this.rm.getConnectionManager().getTcpConnection().read(5, TimeUnit.SECONDS);
         } catch (NetworkException e) {
+            logger.error("network exception while sending message to server", e);
             return "ERROR: " + e.getMessage();
+        } catch (BlockingQueueTimeoutException e) {
+            logger.error("timeout while waiting for server to respond", e);
+            return "ERROR: timeout - server didn't respond";
         } catch (InterruptedException e) {
             // ignore and shutdown
         }

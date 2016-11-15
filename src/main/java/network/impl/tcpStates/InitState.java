@@ -22,7 +22,7 @@ public final class InitState implements State {
      * must be callable multiple times and must not throw exceptions
      */
     @Override
-    public void close() {
+    public void closeMe() {
 
     }
 

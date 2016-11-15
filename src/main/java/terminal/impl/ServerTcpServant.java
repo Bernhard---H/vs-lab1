@@ -8,11 +8,15 @@ import terminal.ServantException;
 import terminal.exceptions.ParseException;
 import terminal.instruction.IInstruction;
 import terminal.instruction.IInstructionStore;
+import terminal.instruction.impl.InstructionStore;
+import terminal.instruction.impl.SendTcpServerInstruction;
 import terminal.model.Command;
 import terminal.model.IArguments;
+import terminal.model.IServerArguments;
 import terminal.model.Session;
 import terminal.parser.IArgumentsParser;
 import terminal.parser.ICommandParser;
+import terminal.parser.impl.CommandParser;
 import util.CloseMe;
 import util.ServerResourceManager;
 
@@ -23,8 +27,8 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
 
     private static final Log logger = LogFactory.getLog(UserServant.class);
 
-    private IInstructionStore<ServerResourceManager> store = null;
-    private ICommandParser parser = null;
+    private IInstructionStore<ServerResourceManager> store;
+    private ICommandParser parser;
     private Session session;
 
 
@@ -32,6 +36,10 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
         super(rm);
         assert session != null;
         this.session = session;
+
+        this.store = new InstructionStore<>();
+        this.store.register(new SendTcpServerInstruction());
+        this.parser = new CommandParser();
     }
 
 
@@ -105,6 +113,9 @@ public final class ServerTcpServant extends Servant<ServerResourceManager> imple
                 arguments = null;
             } else {
                 arguments = argsParser.parse(command.getParameter());
+                if (arguments instanceof IServerArguments) {
+                    ((IServerArguments) arguments).setSession(session);
+                }
             }
 
             String result = instruction.execute(arguments, this.rm);

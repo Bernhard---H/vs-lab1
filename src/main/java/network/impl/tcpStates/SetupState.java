@@ -2,7 +2,10 @@ package network.impl.tcpStates;
 
 import network.NetworkException;
 import network.impl.TcpSetupException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import util.Config;
+import util.ResourceManager;
 import util.ServerResourceManager;
 
 import java.io.IOException;
@@ -14,23 +17,16 @@ import java.util.MissingResourceException;
  */
 public final class SetupState implements State {
 
-    /**
-     * cache config for all instances of the tcp server
-     */
-    private static Config config = null;
+    private static final Log logger = LogFactory.getLog(SetupState.class);
 
     private int tcpPort;
 
     private ServerSocket serverSocket = null;
 
 
-    private void loadConfig() throws NetworkException {
+    private void loadConfig(ResourceManager rm) throws NetworkException {
         try {
-            if (config == null) {
-                // load
-                config = new Config("chatserver.properties");
-            }
-
+            Config config = rm.getConfig();
             this.tcpPort = config.getInt("tcp.port");
         } catch (MissingResourceException e) {
             // new Config() failed   ||  could not find "tcp.port"
@@ -54,7 +50,7 @@ public final class SetupState implements State {
 
     @Override
     public State run(ServerResourceManager rm) throws NetworkException {
-        this.loadConfig();
+        this.loadConfig(rm);
         this.createSocket();
         return new WaitForClientState(this.serverSocket);
     }
@@ -63,7 +59,7 @@ public final class SetupState implements State {
      * must be callable multiple times and must not throw exceptions
      */
     @Override
-    public void close() {
+    public void closeMe() {
         if (this.serverSocket != null) {
             try {
                 this.serverSocket.close();

@@ -25,17 +25,17 @@ public final class IO {
                     return scanner.nextLine();
                 } catch (NoSuchElementException e) {
                     // not a full line jet
-                    Thread.sleep(200);
+                    Thread.sleep(500);
                 }
             } else {
-                Thread.sleep(200);
+                Thread.sleep(500);
             }
         }
         throw new InterruptedException();
     }
 
     public static String interruptableReadln(DatagramSocket socket) throws InterruptedException, IOException {
-        socket.setSoTimeout(200);
+        socket.setSoTimeout(500);
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 byte[] buf = new byte[63 * 1024];

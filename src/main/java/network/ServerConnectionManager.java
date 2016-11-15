@@ -1,7 +1,10 @@
 package network;
 
+import network.impl.InnerServantException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import terminal.ServantException;
+import terminal.impl.ServerTcpServant;
 import terminal.model.Session;
 import util.BlockingQueueTimeoutException;
 import util.CloseMe;
@@ -21,15 +24,12 @@ public final class ServerConnectionManager implements CloseMe {
 
     private static final Log logger = LogFactory.getLog(ServerConnectionManager.class);
 
-    /**
-     * @deprecated
-     */
-    private List<ConnectionPlus> clientConnections = new ArrayList<>();
     private List<Session> openSessions = new ArrayList<>();
     private ReadWriteLock sessionsLock = new ReentrantReadWriteLock();
     private ServerResourceManager rm;
 
     public ServerConnectionManager(ServerResourceManager rm) {
+        assert rm != null;
         this.rm = rm;
     }
 
@@ -40,14 +40,25 @@ public final class ServerConnectionManager implements CloseMe {
      * @throws NetworkException
      */
     public void addNewConnection(NetClient client) throws NetworkException {
+        assert client != null;
         this.sessionsLock.writeLock().lock();
 
         if (this.openSessions == null) {
             throw new IllegalStateException("SessionManager has already been closed");
         }
+        assert this.rm != null;
+        assert this.rm.getThreadManager() != null;
         this.rm.getThreadManager().execute(client);
+
         ConnectionContainer connection = this.wrapConnection(client);
-        this.openSessions.add(new Session(connection));
+        Session session = new Session(connection);
+        this.openSessions.add(session);
+
+        try {
+            this.rm.getThreadManager().execute(new ServerTcpServant(session, this.rm));
+        } catch (ServantException e) {
+            throw new InnerServantException("failed to crate server tcp servant", e);
+        }
 
         this.sessionsLock.writeLock().unlock();
     }
@@ -58,6 +69,7 @@ public final class ServerConnectionManager implements CloseMe {
 
 
     public void broadcast(Session sender, String message) {
+        this.sessionsLock.readLock().lock();
         if (this.openSessions == null) {
             throw new IllegalStateException("SessionManager has already been closed");
         }
@@ -72,18 +84,22 @@ public final class ServerConnectionManager implements CloseMe {
                 }
             }
         }
+        this.sessionsLock.readLock().unlock();
     }
 
 
     public Session getSession(String name) {
+        this.sessionsLock.readLock().lock();
         if (this.openSessions == null) {
             throw new IllegalStateException("SessionManager has already been closed");
         }
         for (Session session : this.openSessions) {
             if (session.getName().equals(name)) {
+                this.sessionsLock.readLock().unlock();
                 return session;
             }
         }
+        this.sessionsLock.readLock().unlock();
         return null;
     }
 
@@ -91,10 +107,13 @@ public final class ServerConnectionManager implements CloseMe {
     @Override
     public void closeMe() {
         this.sessionsLock.writeLock().lock();
-        for (CloseMe client : this.openSessions) {
-            client.closeMe();
+        if (this.openSessions != null) {
+            Iterable<Session> sessions = this.openSessions;
+            this.openSessions = null;
+            for (CloseMe client : sessions) {
+                client.closeMe();
+            }
         }
-        this.openSessions = null;
         this.sessionsLock.writeLock().unlock();
 
         if (this.rm != null) {
@@ -117,15 +136,18 @@ public final class ServerConnectionManager implements CloseMe {
 
         private void removeMeFromConnectionList() {
             sessionsLock.writeLock().lock();
-            Iterator<Session> iterator = openSessions.iterator();
-            while (iterator.hasNext()) {
-                Session session = iterator.next();
-                if (session.getConnection() == this) {
-                    iterator.remove();
-                    sessionsLock.writeLock().unlock();
-                    return;
+            if (openSessions != null) {
+                Iterator<Session> iterator = openSessions.iterator();
+                while (iterator.hasNext()) {
+                    Session session = iterator.next();
+                    if (session.getConnection() == this) {
+                        iterator.remove();
+                        sessionsLock.writeLock().unlock();
+                        return;
+                    }
                 }
             }
+            sessionsLock.writeLock().unlock();
         }
 
         @Override

@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class ResourceManager implements CloseMe {
 
-    private ThreadManager threadManager = null;
+    private ThreadManager threadManager = new ThreadManager();
     private InputStream userRequestStream;
     private PrintStream userResponseStream;
     private Config config;
@@ -29,9 +29,6 @@ public abstract class ResourceManager implements CloseMe {
     }
 
     public ThreadManager getThreadManager() {
-        if (this.threadManager == null) {
-            this.threadManager = new ThreadManager();
-        }
         return threadManager;
     }
 
