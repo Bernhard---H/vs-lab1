@@ -8,7 +8,7 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ClientExitInstruction implements IClientInstruction<SimpleArgument> {
+public final class ExitClientInstruction implements IClientInstruction<SimpleArgument> {
     @Override
     public String getName() {
         return "exit";

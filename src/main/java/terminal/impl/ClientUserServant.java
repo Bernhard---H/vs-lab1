@@ -21,7 +21,7 @@ public final class ClientUserServant extends UserServant<ClientResourceManager> 
         this.store.register(new MessageInstruction());
         this.store.register(new ListInstruction());
         this.store.register(new LastMsgInstruction());
-        this.store.register(new ClientExitInstruction());
+        this.store.register(new ExitClientInstruction());
     }
 
     @Override

@@ -8,7 +8,7 @@ import util.ServerResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ServerExitInstruction implements IServerInstruction<SimpleArgument> {
+public final class ExitServerInstruction implements IServerInstruction<SimpleArgument> {
     @Override
     public String getName() {
         return "exit";

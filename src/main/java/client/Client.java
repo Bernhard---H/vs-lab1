@@ -57,13 +57,11 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String login(String username, String password) {
-        // TODO Auto-generated method stub
         return this.sendToServer("!login " + username + " " + password);
     }
 
     @Override
     public String logout() {
-        // TODO Auto-generated method stub
         return this.sendToServer("!logout");
     }
 

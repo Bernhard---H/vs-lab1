@@ -1,8 +1,11 @@
 package network;
 
+import network.impl.InnerServantException;
 import network.impl.TcpClient;
 import network.impl.UdpClient;
 import network.model.Address;
+import terminal.ServantException;
+import terminal.impl.ClientInterceptServant;
 import util.ClientResourceManager;
 import util.CloseMe;
 
@@ -14,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class ClientConnectionManager implements CloseMe {
 
-    private NetClient toServerTcp = null;
+    private ConnectionPlus toServerTcp = null;
     private NetClient toServerUdp = null;
     private Lock serverLock = new ReentrantLock();
     private ClientResourceManager rm;
@@ -26,8 +29,15 @@ public final class ClientConnectionManager implements CloseMe {
     private void createTcpConnection() throws NetworkException {
         String host = this.rm.getConfig().getString("chatserver.host");
         int port = this.rm.getConfig().getInt("chatserver.tcp.port");
-        this.toServerTcp = new TcpClient(new Address(host, port));
-        this.rm.getThreadManager().execute(this.toServerTcp);
+        NetClient tcpClient = new TcpClient(new Address(host, port));
+        this.rm.getThreadManager().execute(tcpClient);
+
+        // wrap connection in interceptors:
+        try {
+            this.toServerTcp = new ClientInterceptServant(tcpClient, this.rm);
+        } catch (ServantException e) {
+            throw new InnerServantException("failed to package server connection",e);
+        }
     }
 
     public ConnectionPlus getTcpConnection() throws NetworkException {

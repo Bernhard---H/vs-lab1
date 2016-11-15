@@ -5,5 +5,4 @@ package network;
  */
 public interface NetClient extends ConnectionPlus, Runnable {
 
-    public boolean isClosed();
 }
