@@ -1,6 +1,8 @@
 package chatserver;
 
+import network.NetworkException;
 import network.impl.TcpServer;
+import network.impl.UdpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import terminal.impl.ServerUserServant;
@@ -46,6 +48,14 @@ public class Chatserver implements IChatserverCli, Runnable {
 
         TcpServer tcpServer = new TcpServer(this.rm);
         this.rm.getThreadManager().execute(tcpServer);
+
+        try {
+            int port = this.rm.getConfig().getInt("udp.port");
+            UdpServer udpServer = new UdpServer(port, this.rm.getConnectionManager());
+            this.rm.getThreadManager().execute(udpServer);
+        } catch (NetworkException e) {
+            logger.error("failed to start upd server: ", e);
+        }
 
         logger.info("closing thread");
     }

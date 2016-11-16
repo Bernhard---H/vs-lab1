@@ -6,7 +6,7 @@ import util.ClientResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class AbstractClientInstruction<T extends IArguments> implements IClientInstruction<T> {
+public abstract class AbstractClientInstruction<T extends IArguments> implements IInstruction<T> {
 
     protected ClientResourceManager rm;
 

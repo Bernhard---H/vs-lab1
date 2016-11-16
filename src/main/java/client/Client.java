@@ -40,14 +40,13 @@ public class Client implements IClientCli, Runnable {
         this.componentName = componentName;
         this.config = config;
 
-        // TODO
         this.rm = new ClientResourceManager(this, new ClientSessionManager(), this.config, userRequestStream, userResponseStream);
     }
 
     @Override
     public void run() {
         logger.info("start thread");
-        // TODO
+
         this.servant = new ClientUserServant(this.rm, this.componentName);
 
         this.rm.getThreadManager().execute(this.servant);
@@ -83,7 +82,12 @@ public class Client implements IClientCli, Runnable {
     public String list() {
         try {
             this.rm.getConnectionManager().getUdpConnection().print("!list");
-            return this.rm.getConnectionManager().getUdpConnection().read(5, TimeUnit.SECONDS);
+            String response = this.rm.getConnectionManager().getUdpConnection().read(5, TimeUnit.SECONDS);
+            StringBuilder ret = new StringBuilder();
+            for (String user : response.split(" ")){
+                ret.append(user).append('\n');
+            }
+            return ret.toString();
         } catch (NetworkException e) {
             return "ERROR: " + e.getMessage();
         } catch (BlockingQueueTimeoutException e) {
@@ -116,8 +120,10 @@ public class Client implements IClientCli, Runnable {
     }
 
     public String registerAddress(Address privateAddress) {
-        // todo: implement
-        return null;
+        // todo: 1. create socket
+
+        // register with server
+        return this.sendToServer("!register " + privateAddress.format());
     }
 
 

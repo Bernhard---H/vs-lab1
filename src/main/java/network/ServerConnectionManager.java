@@ -112,7 +112,6 @@ public final class ServerConnectionManager implements CloseMe {
         this.sessionsLock.readLock().unlock();
     }
 
-
     public Session getSession(String name) {
         this.sessionsLock.readLock().lock();
         if (this.openSessions == null) {
@@ -126,6 +125,27 @@ public final class ServerConnectionManager implements CloseMe {
         }
         this.sessionsLock.readLock().unlock();
         return null;
+    }
+
+    public List<String> getOnlineUsers() {
+        this.sessionsLock.readLock().lock();
+        if (this.openSessions == null) {
+            throw new IllegalStateException("SessionManager has already been closed");
+        }
+
+        List<String> online = new ArrayList<>();
+        for (Session session : this.openSessions) {
+            ConnectionPlus connection = session.getConnection();
+            if (connection != null && !connection.isClosed()) {
+                String name = session.getName();
+                if (name != null && !name.isEmpty()) {
+                    online.add(name);
+                }
+            }
+        }
+
+        this.sessionsLock.readLock().unlock();
+        return online;
     }
 
 

@@ -3,6 +3,7 @@ package terminal.instruction.impl;
 import terminal.instruction.AbstractClientInstruction;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
+import terminal.parser.impl.SimpleParser;
 import util.ClientResourceManager;
 
 /**
@@ -22,11 +23,11 @@ public final class LookupInstruction extends AbstractClientInstruction<SimpleArg
     @Override
     public IArgumentsParser<SimpleArgument> getArgumentsParser() {
         // simple argument is ok
-        return null;
+        return new SimpleParser();
     }
 
     @Override
     public String execute(SimpleArgument args) {
-        return null;
+        return this.rm.getClient().lookup(args.getArgument().trim());
     }
 }

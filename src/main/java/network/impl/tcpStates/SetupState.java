@@ -29,8 +29,8 @@ public final class SetupState implements State {
             Config config = rm.getConfig();
             this.tcpPort = config.getInt("tcp.port");
         } catch (MissingResourceException e) {
-            // new Config() failed   ||  could not find "tcp.port"
-            throw new TcpSetupException("Failed to load config", e);
+            // could not find "tcp.port"
+            throw new TcpSetupException("could not find key: tcp.port", e);
         } catch (NumberFormatException e) {
             // failed to read port
             throw new TcpSetupException("illegal format for tcp.port in config", e);

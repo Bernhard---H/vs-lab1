@@ -1,6 +1,7 @@
 package terminal.model;
 
 import network.ConnectionPlus;
+import network.model.Address;
 import terminal.SessionState;
 import util.CloseMe;
 
@@ -15,6 +16,7 @@ public final class Session implements CloseMe {
     private SessionState state = SessionState.NOBODY;
     private ConnectionPlus connection;
     private String user = null;
+    private Address privateAddress = null;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public Session(ConnectionPlus connection) {
@@ -38,6 +40,15 @@ public final class Session implements CloseMe {
 
     public ConnectionPlus getConnection() {
         return this.connection;
+    }
+
+    public Address getPrivateAddress() {
+        return privateAddress;
+    }
+
+    public void registerPrivateAddress(Address privateAddress) {
+        assert privateAddress != null;
+        this.privateAddress = privateAddress;
     }
 
     public void setAuthenticated(String user) {

@@ -7,10 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
-import terminal.instruction.impl.InstructionStore;
-import terminal.instruction.impl.LoginTcpServerInstruction;
-import terminal.instruction.impl.LogoutTcpServerInstruction;
-import terminal.instruction.impl.SendTcpServerInstruction;
+import terminal.instruction.impl.*;
 import terminal.model.Session;
 import terminal.parser.impl.CommandParser;
 import util.CloseMe;
@@ -35,6 +32,8 @@ public final class ServerTcpServant extends Servant implements Runnable {
         this.store.register(new SendTcpServerInstruction(rm, session));
         this.store.register(new LoginTcpServerInstruction(rm, session));
         this.store.register(new LogoutTcpServerInstruction(rm, session));
+        this.store.register(new RegisterTcpServerInstruction(session));
+        this.store.register(new LookupTcpServerInstruction(rm, session));
         //this.store.register(new ExitTcpServerInstruction(rm, session));
         this.parser = new CommandParser();
     }

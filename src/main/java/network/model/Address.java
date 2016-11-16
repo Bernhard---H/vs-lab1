@@ -19,4 +19,8 @@ public final class Address {
     public int getPort() {
         return port;
     }
+
+    public String format() {
+        return this.host + ":" + this.port;
+    }
 }

@@ -6,7 +6,7 @@ import util.ServerResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public abstract class AbstractServerInstruction<T extends IArguments> implements IServerInstruction<T> {
+public abstract class AbstractServerInstruction<T extends IArguments> implements IInstruction<T> {
 
     protected ServerResourceManager rm;
 

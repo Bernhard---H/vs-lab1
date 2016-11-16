@@ -105,7 +105,10 @@ public final class TcpClient implements NetClient {
 
             while (!Thread.currentThread().isInterrupted()) {
                 String line = IO.interruptableReadln(this.socket.getInputStream(), this.inputScanner);
-                this.msgQueue.put(line);
+                if (!line.trim().isEmpty()) {
+                    // ignore empty lines
+                    this.msgQueue.put(line);
+                }
             }
         } catch (InterruptedException e) {
             // thread manager tells us to exit OR

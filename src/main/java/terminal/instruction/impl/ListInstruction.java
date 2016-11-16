@@ -27,7 +27,6 @@ public final class ListInstruction extends AbstractClientInstruction<SimpleArgum
 
     @Override
     public String execute(SimpleArgument args) {
-        // todo: implement
         return rm.getClient().list();
     }
 }
