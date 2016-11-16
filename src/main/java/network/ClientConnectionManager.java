@@ -34,7 +34,9 @@ public final class ClientConnectionManager implements CloseMe {
 
         // wrap connection in interceptors:
         try {
-            this.toServerTcp = new ClientInterceptServant(tcpClient, this.rm);
+            ClientInterceptServant servant = new ClientInterceptServant(tcpClient, this.rm);
+            this.rm.getThreadManager().execute(servant);
+            this.toServerTcp = servant;
         } catch (ServantException e) {
             throw new InnerServantException("failed to package server connection",e);
         }

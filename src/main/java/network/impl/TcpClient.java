@@ -19,9 +19,9 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Bernhard Halbartschlager
- *
  * throws IllegalStateException if TcpClient.closeMe() has been called
+ *
+ * @author Bernhard Halbartschlager
  */
 public final class TcpClient implements NetClient {
 
@@ -36,6 +36,7 @@ public final class TcpClient implements NetClient {
 
     /**
      * construct actual tcp client for Client.java
+     *
      * @param address
      * @throws NetworkException
      */
@@ -50,6 +51,7 @@ public final class TcpClient implements NetClient {
 
     /**
      * misuse for tcp server after connection has been established
+     *
      * @param socket
      */
     public TcpClient(Socket socket) {

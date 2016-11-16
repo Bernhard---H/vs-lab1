@@ -149,7 +149,7 @@ public final class MyCloseableBlockingQueue<E> implements CloseableBlockingQueue
         if (this.closed) {
             this.queue.offer(poison);
         }
-        Container c = queue.poll(timeout, unit);
+        Container c = this.queue.poll(timeout, unit);
         if (c == null) {
             throw new BlockingQueueTimeoutException("timeout: " + timeout + " " + unit);
         }

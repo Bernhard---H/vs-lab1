@@ -61,11 +61,9 @@ public final class ServerTcpServant extends Servant implements Runnable {
             }
         } catch (InterruptedException e) {
             // ingore and exit
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.fatal(e);
-        }
-        finally {
+        } finally {
             this.closeMe();
         }
         logger.info("closing thread");
