@@ -33,7 +33,7 @@ public final class SendTcpServerInstruction extends ASessionServerInstruction<Si
             return "unauthorized operation: please log in first";
         }
         String msg = "!send "+ this.session.getName() + ": "+ args.getArgument();
-        rm.getConnectionManager().broadcast(this.session, msg);
+        rm.getConnectionManager().authenticatedBroadcast(this.session, msg);
         return "server finished broadcasting";
     }
 

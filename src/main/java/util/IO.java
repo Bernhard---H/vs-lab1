@@ -26,11 +26,7 @@ public final class IO {
                 try {
                     // try to read a line
                     // this is probably a blocking operation
-                    String line = scanner.nextLine();
-                    if (!line.trim().isEmpty()) {
-                        // ignore input if only whitespace
-                        return line;
-                    }
+                    return scanner.nextLine();
                 } catch (NoSuchElementException e) {
                     // not a (full) line available jet
                     Thread.sleep(200);

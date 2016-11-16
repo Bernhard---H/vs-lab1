@@ -4,6 +4,7 @@ import network.impl.InnerServantException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import terminal.ServantException;
+import terminal.SessionState;
 import terminal.impl.ServerTcpServant;
 import terminal.model.Session;
 import util.BlockingQueueTimeoutException;
@@ -67,7 +68,9 @@ public final class ServerConnectionManager implements CloseMe {
         return new ConnectionContainer(client);
     }
 
-
+    /**
+     * to anyone who is willing to receive (except the sender)
+     */
     public void broadcast(Session sender, String message) {
         this.sessionsLock.readLock().lock();
         if (this.openSessions == null) {
@@ -75,6 +78,28 @@ public final class ServerConnectionManager implements CloseMe {
         }
         for (Session session : this.openSessions) {
             if (session != sender) {
+                ConnectionPlus connection = session.getConnection();
+                try {
+                    connection.print(message);
+                } catch (IllegalStateException | NetworkException e) {
+                    // ignore
+                    logger.info(e);
+                }
+            }
+        }
+        this.sessionsLock.readLock().unlock();
+    }
+
+    /**
+     * for logged in users only
+     */
+    public void authenticatedBroadcast(Session sender, String message) {
+        this.sessionsLock.readLock().lock();
+        if (this.openSessions == null) {
+            throw new IllegalStateException("SessionManager has already been closed");
+        }
+        for (Session session : this.openSessions) {
+            if (session != sender && session.getState() == SessionState.AUTHENTICATED) {
                 ConnectionPlus connection = session.getConnection();
                 try {
                     connection.print(message);

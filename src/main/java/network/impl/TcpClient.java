@@ -125,8 +125,6 @@ public final class TcpClient implements NetClient {
     @Override
     public synchronized void closeMe() {
         if (this.out != null) {
-            // notify server that client is closing
-            this.out.println("!exit");
             this.out.close();
             this.out = null;
         }
