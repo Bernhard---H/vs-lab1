@@ -1,13 +1,17 @@
 package network.impl;
 
+import network.NetClient;
 import network.NetServer;
 import network.NetworkException;
-import network.impl.tcpStates.InitState;
-import network.impl.tcpStates.State;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import util.CloseMe;
 import util.ServerResourceManager;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 /**
  * @author Bernhard Halbartschlager
@@ -16,37 +20,43 @@ public final class TcpServer implements NetServer {
 
     private static final Log logger = LogFactory.getLog(TcpServer.class);
 
-    private State currentState = new InitState();
     private ServerResourceManager rm;
+    private ServerSocket serverSocket = null;
 
-    public TcpServer(ServerResourceManager rm) {
+    public TcpServer(int port, ServerResourceManager rm) throws NetworkException {
+        assert rm != null;
         this.rm = rm;
+
+        try {
+            this.serverSocket = new ServerSocket(port);
+            // enables thread to be interrupted
+            // 500ms ... half a second
+            this.serverSocket.setSoTimeout(500);
+        } catch (IOException e) {
+            throw new TcpSetupException("creating the tcp socket failed", e);
+        }
     }
 
 
-    /**
-     * When an object implementing interface <code>Runnable</code> is used
-     * to create a thread, starting the thread causes the object's
-     * <code>run</code> method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method <code>run</code> is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
     @Override
     public void run() {
         logger.info("start thread");
         try {
 
-            while (!Thread.currentThread().isInterrupted() && this.currentState != null) {
-                // run the action of the current state
-                this.currentState = this.currentState.run(this.rm);
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    Socket client = this.serverSocket.accept();
+                    NetClient netClient = new TcpClient(client);
+                    this.rm.getConnectionManager().addNewConnection(netClient);
+                } catch (SocketTimeoutException e) {
+                    // ignore: check if thread is interrupted and try again
+                }
             }
 
+        } catch (IOException e) {
+            logger.fatal("error while waiting for client connection", e);
         } catch (NetworkException e) {
-            logger.fatal("Network exception in tcp server",e);
+            logger.fatal("Network exception in tcp server", e);
         } finally {
             this.closeMe();
         }
@@ -55,9 +65,14 @@ public final class TcpServer implements NetServer {
 
 
     public void closeMe() {
-        if (this.currentState != null) {
-            this.currentState.closeMe();
-            this.currentState = null;
+        if (this.serverSocket != null) {
+            try {
+                this.serverSocket.close();
+            } catch (IOException e) {
+                logger.error("io exception while closing", e);
+            } finally {
+                this.serverSocket = null;
+            }
         }
         if (this.rm != null) {
             CloseMe closeMe = this.rm;

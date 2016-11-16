@@ -41,20 +41,29 @@ public class Chatserver implements IChatserverCli, Runnable {
     @Override
     public void run() {
         logger.info("start thread");
-        // TODO
-
-        ServerUserServant servant = new ServerUserServant(this.rm, this.componentName);
-        this.rm.getThreadManager().execute(servant);
-
-        TcpServer tcpServer = new TcpServer(this.rm);
-        this.rm.getThreadManager().execute(tcpServer);
 
         try {
-            int port = this.rm.getConfig().getInt("udp.port");
-            UdpServer udpServer = new UdpServer(port, this.rm.getConnectionManager());
-            this.rm.getThreadManager().execute(udpServer);
-        } catch (NetworkException e) {
-            logger.error("failed to start upd server: ", e);
+            ServerUserServant servant = new ServerUserServant(this.rm, this.componentName);
+            this.rm.getThreadManager().execute(servant);
+
+            try {
+                Config config = rm.getConfig();
+                int port = config.getInt("tcp.port");
+                TcpServer tcpServer = new TcpServer(port, this.rm);
+                this.rm.getThreadManager().execute(tcpServer);
+            } catch (NetworkException e) {
+                logger.error("failed to start tcp server: ", e);
+            }
+
+            try {
+                int port = this.rm.getConfig().getInt("udp.port");
+                UdpServer udpServer = new UdpServer(port, this.rm.getConnectionManager());
+                this.rm.getThreadManager().execute(udpServer);
+            } catch (NetworkException e) {
+                logger.error("failed to start upd server: ", e);
+            }
+        } catch (Exception e){
+            logger.fatal("random exception:", e);
         }
 
         logger.info("closing thread");
