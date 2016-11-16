@@ -59,11 +59,9 @@ public final class ClientResourceManager extends ResourceManager {
      */
     @Override
     public void closeMe() {
-        this.closeMeLock.lock();
         super.closeMe();
 
         this.sessionManager.closeMe();
         this.connectionManager.closeMe();
-        this.closeMeLock.unlock();
     }
 }

@@ -4,10 +4,7 @@ import network.NetworkException;
 import network.impl.UdpLimitExceededException;
 
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -16,18 +13,13 @@ import java.util.Scanner;
  */
 public final class IO {
 
-    public static String interruptableReadln(InputStream inputStream, Scanner scanner) throws InterruptedException, IOException {
+    public static String interruptableReadln(Scanner scanner) throws InterruptedException, IOException {
         while (!Thread.currentThread().isInterrupted()) {
-            if (inputStream.available() > 0) {
-                // can read something
-                try {
-                    // read line
-                    return scanner.nextLine();
-                } catch (NoSuchElementException e) {
-                    // not a full line jet
-                    Thread.sleep(500);
-                }
-            } else {
+            try {
+                // try to read a line
+                return scanner.nextLine();
+            } catch (NoSuchElementException e) {
+                // not a (full) line available jet
                 Thread.sleep(500);
             }
         }
@@ -38,7 +30,7 @@ public final class IO {
         socket.setSoTimeout(500);
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                byte[] buf = new byte[63 * 1024];
+                byte[] buf = new byte[64 * 1024];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 return new String(packet.getData(), 0, packet.getLength(), "UTF-8");

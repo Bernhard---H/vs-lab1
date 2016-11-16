@@ -70,7 +70,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
     }
 
 
-    protected void println(String msg) {
+    private void println(String msg) {
         try {
             this.session.getConnection().print(msg + "\n");
         } catch (NetworkException e) {
@@ -79,12 +79,10 @@ public final class ServerTcpServant extends Servant implements Runnable {
             logger.error(e);
         }
     }
-
-    protected void printError(String e) {
+    private void printError(String e) {
         this.println("ERROR: " + e);
     }
-
-    protected void printError(Exception e) {
+    private void printError(Exception e) {
         this.println("ERROR: " + e.getMessage());
         logger.error(e);
     }

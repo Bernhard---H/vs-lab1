@@ -9,7 +9,6 @@ import util.IO;
 import util.ResourceManager;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Scanner;
 
 /**
@@ -43,12 +42,11 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
     @Override
     public void run() {
         logger.info("start thread");
-        InputStream inputStream = this.rm.getUserRequestStream();
 
-        try (Scanner scanner = IO.toScanner(inputStream)) {
+        try (Scanner scanner = IO.toScanner(this.rm.getUserRequestStream())) {
             while (!Thread.currentThread().isInterrupted()) {
                 this.printPrompt();
-                String line = IO.interruptableReadln(inputStream, scanner);
+                String line = IO.interruptableReadln(scanner);
                 if (!line.trim().isEmpty()) {
                     try {
                         String result = this.runInput(line);
@@ -61,6 +59,7 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
             }
         } catch (InterruptedException e) {
             // ingore and exit
+            logger.info("thread interrupted: closing");
         } catch (IOException e) {
             this.printError(e);
         } catch (Exception e) {

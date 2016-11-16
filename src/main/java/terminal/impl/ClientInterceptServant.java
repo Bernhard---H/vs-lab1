@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class ClientInterceptServant extends Servant<ClientResourceManager> implements ConnectionPlus {
 
-    private static final Log logger = LogFactory.getLog(ServerTcpServant.class);
+    private static final Log logger = LogFactory.getLog(ClientInterceptServant.class);
 
     private ConnectionPlus connection;
     private CloseableBlockingQueue<String> msgQueue = new MyCloseableBlockingQueue<>();
@@ -55,25 +55,27 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
     public void run() {
         logger.info("start thread");
 
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-                String input = this.connection.read();
-                try {
-                    this.println(this.runInput(input));
-                } catch (ArgumentParseException e) {
-                    // command parsed and found in list but wrong argument format
-                    this.printError(e);
-                } catch (ParseException e) {
-                    this.msgQueue.put(input);
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    String input = this.connection.read();
+                    try {
+                        this.println(this.runInput(input));
+                    } catch (ArgumentParseException e) {
+                        // command parsed and found in list but wrong argument format
+                        this.printError(e);
+                    } catch (ParseException e) {
+                        this.msgQueue.put(input);
+                    }
                 }
+            } catch (InterruptedException e) {
+                // ingore and exit
+                //logger.info("thread interrupted: closing");
+            } catch (Exception e) {
+                logger.fatal(e);
+            } finally {
+                this.closeMe();
             }
-        } catch (InterruptedException e) {
-            // ingore and exit
-        } catch (Exception e) {
-            logger.fatal(e);
-        } finally {
-            this.closeMe();
-        }
+
         logger.info("closing thread");
     }
 
@@ -112,7 +114,7 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
     }
 
     @Override
-    public synchronized void closeMe() {
+    public void closeMe() {
         super.closeMe();
         if (this.connection != null) {
             CloseMe closeMe = this.connection;

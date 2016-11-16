@@ -34,13 +34,11 @@ public final class ServerResourceManager extends ResourceManager {
      */
     @Override
     public void closeMe() {
-        this.closeMeLock.lock();
         super.closeMe();
         if (this.connectionManager != null) {
             CloseMe closeMe = this.connectionManager;
             this.connectionManager = null;
             closeMe.closeMe();
         }
-        this.closeMeLock.unlock();
     }
 }

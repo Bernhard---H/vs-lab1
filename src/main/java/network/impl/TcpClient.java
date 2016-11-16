@@ -11,7 +11,6 @@ import util.IO;
 import util.impl.MyCloseableBlockingQueue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
@@ -29,7 +28,6 @@ public final class TcpClient implements NetClient {
 
     private Socket socket;
     private PrintWriter out;
-    private InputStream inputStream;
     private Scanner inputScanner;
     private CloseableBlockingQueue<String> msgQueue = new MyCloseableBlockingQueue<>();
     private Semaphore bootSemaphore = new Semaphore(0);
@@ -100,20 +98,17 @@ public final class TcpClient implements NetClient {
         logger.info("start thread");
         try {
             this.out = new PrintWriter(this.socket.getOutputStream(), true);
-            this.inputStream = this.socket.getInputStream();
-            this.inputScanner = IO.toScanner(this.inputStream);
+            this.inputScanner = IO.toScanner(this.socket.getInputStream());
 
             // END of setup
             this.bootSemaphore.release(Integer.MAX_VALUE);
 
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    String line = IO.interruptableReadln(this.inputStream, this.inputScanner);
-                    this.msgQueue.put(line);
-                }
-            } catch (InterruptedException e) {
-                // ingore and exit
+            while (!Thread.currentThread().isInterrupted()) {
+                String line = IO.interruptableReadln(this.inputScanner);
+                this.msgQueue.put(line);
             }
+        } catch (InterruptedException e) {
+            // thread manager tells us to exit OR
         } catch (IOException e) {
             logger.error(e);
         } finally {
@@ -133,19 +128,8 @@ public final class TcpClient implements NetClient {
             this.out.close();
             this.out = null;
         }
-        if (this.inputStream != null) {
-            if (this.inputScanner == null) {
-                // no scanner created jet
-                try {
-                    this.inputStream.close();
-                } catch (IOException e) {
-                    logger.info("input stream exception while closing", e);
-                }
-            } else {
-                // scanner will autoclose stream
-                this.inputScanner.close();
-            }
-            this.inputStream = null;
+        if (this.inputScanner != null) {
+            this.inputScanner.close();
             this.inputScanner = null;
         }
         if (this.socket != null) {

@@ -53,7 +53,7 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
     }
 
     @Override
-    public synchronized void closeMe() {
+    public void closeMe() {
         if (this.rm != null) {
             // just in case I ever create a circle
             CloseMe closeable = this.rm;

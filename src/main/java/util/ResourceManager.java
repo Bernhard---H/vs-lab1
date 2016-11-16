@@ -4,8 +4,6 @@ import concurrency.ThreadManager;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Bernhard Halbartschlager
@@ -17,7 +15,6 @@ public abstract class ResourceManager implements CloseMe {
     private PrintStream userResponseStream;
     private Config config;
 
-    protected Lock closeMeLock = new ReentrantLock();
 
     public ResourceManager(Config config, InputStream userRequestStream, PrintStream userResponseStream) {
         assert userRequestStream != null;
@@ -49,16 +46,12 @@ public abstract class ResourceManager implements CloseMe {
      * Waring: this will try to close everything
      */
     @Override
-    public  void closeMe() {
-        this.closeMeLock.lock();
-
+    public void closeMe() {
         if (this.threadManager != null) {
             CloseMe closeMe = this.threadManager;
             this.threadManager = null;
             closeMe.closeMe();
         }
-
-        this.closeMeLock.unlock();
     }
 
 }
