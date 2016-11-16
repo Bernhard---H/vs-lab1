@@ -29,7 +29,6 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
         this.rm = rm;
     }
 
-
     protected <T extends IArguments> String runInput(String input) throws ParseException {
         assert input != null;
         assert this.store != null;
@@ -54,12 +53,7 @@ public abstract class Servant<R extends ResourceManager> implements CloseMe, Run
 
     @Override
     public void closeMe() {
-        if (this.rm != null) {
-            // just in case I ever create a circle
-            CloseMe closeable = this.rm;
-            this.rm = null;
-            closeable.closeMe();
-        }
+
     }
 
 }

@@ -8,6 +8,7 @@ import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
 import terminal.exceptions.impl.ArgumentParseException;
+import terminal.instruction.impl.ExitClientInterceptInstruction;
 import terminal.instruction.impl.InstructionStore;
 import terminal.instruction.impl.SendClientInterceptInstruction;
 import terminal.parser.impl.CommandParser;
@@ -36,6 +37,7 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
 
         this.store = new InstructionStore();
         this.store.register(new SendClientInterceptInstruction(rm));
+        this.store.register(new ExitClientInterceptInstruction(rm));
         this.parser = new CommandParser();
     }
 
@@ -71,7 +73,9 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
             // ingore and exit
             //logger.info("thread interrupted: closing");
         } catch (Exception e) {
-            logger.fatal(e);
+            logger.fatal("random exception: ", e);
+            // shutdown client
+            this.rm.closeMe();
         } finally {
             this.closeMe();
         }
@@ -81,6 +85,8 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
 
 
     private void println(String msg) {
+        assert this.rm != null;
+        assert this.rm.getUserResponseStream() != null;
         this.rm.getUserResponseStream().println("\n" + msg);
     }
 
@@ -90,7 +96,7 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
 
     private void printError(Exception e) {
         this.println("ERROR: " + e.getMessage());
-        logger.error(e);
+        logger.error("print Exception: ", e);
     }
 
     @Override

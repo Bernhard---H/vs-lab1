@@ -1,11 +1,13 @@
 package terminal.impl;
 
+import network.ConnectionPlus;
 import network.NetworkException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
+import terminal.instruction.impl.ExitTcpServerInstruction;
 import terminal.instruction.impl.InstructionStore;
 import terminal.instruction.impl.LoginTcpServerInstruction;
 import terminal.instruction.impl.SendTcpServerInstruction;
@@ -32,6 +34,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
         this.store = new InstructionStore();
         this.store.register(new SendTcpServerInstruction(rm, session));
         this.store.register(new LoginTcpServerInstruction(rm, session));
+        this.store.register(new ExitTcpServerInstruction(rm, session));
         this.parser = new CommandParser();
     }
 
@@ -54,7 +57,15 @@ public final class ServerTcpServant extends Servant implements Runnable {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    String line = this.session.getConnection().read();
+                    Session session = this.session;
+                    if (session == null){
+                        throw new InterruptedException();
+                    }
+                    ConnectionPlus connection = session.getConnection();
+                    if (connection == null){
+                        throw new InterruptedException();
+                    }
+                    String line = connection.read();
                     this.println(this.runInput(line));
                 } catch (ParseException e) {
                     printError(e);
@@ -64,7 +75,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
         } catch (InterruptedException e) {
             // ingore and exit
         } catch (Exception e) {
-            logger.fatal(e);
+            logger.fatal("random exception: ", e);
         } finally {
             this.closeMe();
         }
@@ -74,16 +85,25 @@ public final class ServerTcpServant extends Servant implements Runnable {
 
     private void println(String msg) {
         try {
-            this.session.getConnection().print(msg + "\n");
+            // session might already be closed
+            Session session = this.session;
+            if (session != null) {
+                ConnectionPlus connection = session.getConnection();
+                if (connection != null) {
+                    connection.print("!response: " + msg + "\n");
+                }
+            }
         } catch (NetworkException e) {
             // only relevant for udp connections
             assert false;
             logger.error(e);
         }
     }
+
     private void printError(String e) {
         this.println("ERROR: " + e);
     }
+
     private void printError(Exception e) {
         this.println("ERROR: " + e.getMessage());
         logger.error(e);

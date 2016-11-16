@@ -46,7 +46,7 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         try (Scanner scanner = IO.toScanner(this.rm.getUserRequestStream())) {
             while (!Thread.currentThread().isInterrupted()) {
                 this.printPrompt();
-                String line = IO.interruptableReadln(scanner);
+                String line = IO.interruptableReadln(this.rm.getUserRequestStream(), scanner);
                 if (!line.trim().isEmpty()) {
                     try {
                         String result = this.runInput(line);

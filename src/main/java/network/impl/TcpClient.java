@@ -104,7 +104,7 @@ public final class TcpClient implements NetClient {
             this.bootSemaphore.release(Integer.MAX_VALUE);
 
             while (!Thread.currentThread().isInterrupted()) {
-                String line = IO.interruptableReadln(this.inputScanner);
+                String line = IO.interruptableReadln(this.socket.getInputStream(), this.inputScanner);
                 this.msgQueue.put(line);
             }
         } catch (InterruptedException e) {
@@ -125,6 +125,8 @@ public final class TcpClient implements NetClient {
     @Override
     public synchronized void closeMe() {
         if (this.out != null) {
+            // notify server that client is closing
+            this.out.println("!exit");
             this.out.close();
             this.out = null;
         }

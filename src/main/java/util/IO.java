@@ -2,6 +2,8 @@ package util;
 
 import network.NetworkException;
 import network.impl.UdpLimitExceededException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -16,17 +18,24 @@ import java.util.Scanner;
  */
 public final class IO {
 
-    public static String interruptableReadln(Scanner scanner) throws InterruptedException, IOException {
+    private static final Log logger = LogFactory.getLog(IO.class);
+
+    public static String interruptableReadln(InputStream inputStream, Scanner scanner) throws InterruptedException, IOException {
         while (!Thread.currentThread().isInterrupted()) {
-            try {
-                // try to read a line
-                String line = scanner.nextLine();
-                if (!line.trim().isEmpty()) {
-                    // ignore input if only whitespace
-                    return line;
+            if (inputStream.available() > 0) {
+                try {
+                    // try to read a line
+                    // this is probably a blocking operation
+                    String line = scanner.nextLine();
+                    if (!line.trim().isEmpty()) {
+                        // ignore input if only whitespace
+                        return line;
+                    }
+                } catch (NoSuchElementException e) {
+                    // not a (full) line available jet
+                    Thread.sleep(500);
                 }
-            } catch (NoSuchElementException e) {
-                // not a (full) line available jet
+            } else {
                 Thread.sleep(500);
             }
         }
