@@ -1,6 +1,8 @@
 package client;
 
 import network.NetworkException;
+import network.impl.PrivateTcpServer;
+import network.impl.TcpClient;
 import network.model.Address;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,9 +25,7 @@ public class Client implements IClientCli, Runnable {
     private static final Log logger = LogFactory.getLog(Client.class);
 
     private String componentName;
-    private Config config;
     private ClientResourceManager rm;
-    private ClientUserServant servant = null;
 
     /**
      * @param componentName the name of the component - represented in the prompt
@@ -33,23 +33,21 @@ public class Client implements IClientCli, Runnable {
      * @param userRequestStream the input stream to read user input from
      * @param userResponseStream the output stream to write the console output to
      */
-    public Client(String componentName, Config config,
-                  InputStream userRequestStream, PrintStream userResponseStream) {
+    public Client(String componentName, Config config, InputStream userRequestStream, PrintStream userResponseStream) {
         assert userRequestStream != null;
         assert userResponseStream != null;
         this.componentName = componentName;
-        this.config = config;
 
-        this.rm = new ClientResourceManager(this, new ClientSessionManager(), this.config, userRequestStream, userResponseStream);
+        this.rm = new ClientResourceManager(this, new ClientSessionManager(), config, userRequestStream, userResponseStream);
     }
 
     @Override
     public void run() {
         logger.info("start thread");
 
-        this.servant = new ClientUserServant(this.rm, this.componentName);
+        ClientUserServant servant = new ClientUserServant(this.rm, this.componentName);
 
-        this.rm.getThreadManager().execute(this.servant);
+        this.rm.getThreadManager().execute(servant);
 
         logger.info("closing thread");
     }
@@ -84,7 +82,7 @@ public class Client implements IClientCli, Runnable {
             this.rm.getConnectionManager().getUdpConnection().print("!list");
             String response = this.rm.getConnectionManager().getUdpConnection().read(5, TimeUnit.SECONDS);
             StringBuilder ret = new StringBuilder();
-            for (String user : response.split(" ")){
+            for (String user : response.split(" ")) {
                 ret.append(user).append('\n');
             }
             return ret.toString();
@@ -100,8 +98,36 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String msg(String username, String message) {
-        // TODO Auto-generated method stub
-        return null;
+        String lookup = this.lookup(username);
+        if (lookup.startsWith("ERROR")) {
+            return lookup;
+        }
+        Address address;
+        try {
+            address = (new IpPortParser()).parse(lookup).getAddress();
+        } catch (ParseException e) {
+            return "ERROR: couldn't parse response of implicit lookup";
+        }
+
+        TcpClient client;
+        try {
+            client = new TcpClient(address);
+            this.rm.getThreadManager().execute(client);
+        } catch (NetworkException e) {
+            return "ERROR: failed to establish connection to other client";
+        }
+        client.print(this.rm.getSessionManager().getLoggedinUser() + " (private): " + message + "\n");
+        try {
+            String response = client.read(30, TimeUnit.SECONDS);
+            client.closeMe();
+            return response;
+        } catch (BlockingQueueTimeoutException e) {
+            logger.error("timeout while waiting for server to respond", e);
+            return "ERROR: timeout - server didn't respond";
+        } catch (InterruptedException e) {
+            // ignore and shutdown
+        }
+        return "";
     }
 
     @Override
@@ -120,7 +146,12 @@ public class Client implements IClientCli, Runnable {
     }
 
     public String registerAddress(Address privateAddress) {
-        // todo: 1. create socket
+        try {
+            PrivateTcpServer tcpServer = new PrivateTcpServer(privateAddress.getPort(), this.rm);
+            this.rm.getThreadManager().execute(tcpServer);
+        } catch (NetworkException e) {
+            logger.error("failed to start tcp server: ", e);
+        }
 
         // register with server
         return this.sendToServer("!register " + privateAddress.format());
