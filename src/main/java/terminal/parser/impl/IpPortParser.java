@@ -14,12 +14,12 @@ public final class IpPortParser implements IArgumentsParser<IpAddressArg> {
     @Override
     public IpAddressArg parse(String parameter) throws ParseException {
         String[] split = parameter.split(":", 2);
-        if(split.length < 2){
-            throw new ArgumentParseException("input must have the format:  address:port ");
+        if (split.length < 2) {
+            throw new ArgumentParseException("input must have the format:  address:port  but was:  " + parameter);
         }
         try {
             return new IpAddressArg(new Address(split[0], Integer.parseInt(split[1])));
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             throw new ArgumentParseException("port must be an integer", e);
         }
     }

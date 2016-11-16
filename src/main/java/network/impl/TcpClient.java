@@ -111,9 +111,11 @@ public final class TcpClient implements NetClient {
                 }
             }
         } catch (InterruptedException e) {
-            // thread manager tells us to exit OR
+            // thread manager tells us to exit
         } catch (IOException e) {
-            logger.error(e);
+            // ignore and exit
+        } catch (Exception e) {
+            logger.fatal("random Exception", e);
         } finally {
             this.closeMe();
         }

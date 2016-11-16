@@ -36,7 +36,6 @@ public abstract class AbstractTcpServer implements NetServer {
     public void run() {
         logger.info("start thread");
         try {
-
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Socket client = this.serverSocket.accept();
@@ -46,7 +45,6 @@ public abstract class AbstractTcpServer implements NetServer {
                     // ignore: check if thread is interrupted and try again
                 }
             }
-
         } catch (IOException e) {
             logger.fatal("error while waiting for client connection", e);
         } catch (NetworkException e) {

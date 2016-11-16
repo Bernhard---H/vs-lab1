@@ -36,11 +36,11 @@ public final class LookupTcpServerInstruction extends ASessionServerInstruction<
 
         Session session = this.rm.getConnectionManager().getSession(args.getArgument().trim());
         if (session == null){
-            return "Wrong username or user not registered.";
+            return "ERROR Wrong username or user not registered.";
         }
         Address address = session.getPrivateAddress();
         if (address == null){
-            return "Wrong username or user not registered. (not registered)";
+            return "ERROR Wrong username or user not registered. (not registered)";
         }
         return address.format();
     }

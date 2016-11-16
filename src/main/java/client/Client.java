@@ -106,7 +106,7 @@ public class Client implements IClientCli, Runnable {
         try {
             address = (new IpPortParser()).parse(lookup).getAddress();
         } catch (ParseException e) {
-            return "ERROR: couldn't parse response of implicit lookup";
+            return "ERROR: couldn't parse response of implicit lookup: " + e.getMessage();
         }
 
         TcpClient client;
