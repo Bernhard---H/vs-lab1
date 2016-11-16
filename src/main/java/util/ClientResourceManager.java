@@ -55,7 +55,6 @@ public final class ClientResourceManager extends ResourceManager {
     public void closeMe() {
         super.closeMe();
 
-        this.sessionManager.closeMe();
         this.connectionManager.closeMe();
     }
 }

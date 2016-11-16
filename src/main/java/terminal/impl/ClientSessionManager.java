@@ -1,11 +1,9 @@
 package terminal.impl;
 
-import terminal.SessionManager;
-
 /**
  * @author Bernhard Halbartschlager
  */
-public final class ClientSessionManager extends SessionManager {
+public final class ClientSessionManager {
 
     private String loggedinUser = null;
 
