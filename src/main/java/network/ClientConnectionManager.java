@@ -38,16 +38,19 @@ public final class ClientConnectionManager implements CloseMe {
             this.rm.getThreadManager().execute(servant);
             this.toServerTcp = new SyncResponseFilter(servant, this.rm);
         } catch (ServantException e) {
-            throw new InnerServantException("failed to package server connection",e);
+            throw new InnerServantException("failed to package server connection", e);
         }
     }
 
     public ConnectionPlus getTcpConnection() throws NetworkException {
         this.serverLock.lock();
-        if (this.toServerTcp == null || this.toServerTcp.isClosed()) {
-            this.createTcpConnection();
+        try {
+            if (this.toServerTcp == null || this.toServerTcp.isClosed()) {
+                this.createTcpConnection();
+            }
+        } finally {
+            this.serverLock.unlock();
         }
-        this.serverLock.unlock();
         return toServerTcp;
     }
 
@@ -60,25 +63,31 @@ public final class ClientConnectionManager implements CloseMe {
 
     public ConnectionPlus getUdpConnection() throws NetworkException {
         this.serverLock.lock();
-        if (this.toServerUdp == null || this.toServerUdp.isClosed()) {
-            this.createUdpConnection();
+        try {
+            if (this.toServerUdp == null || this.toServerUdp.isClosed()) {
+                this.createUdpConnection();
+            }
+        } finally {
+            this.serverLock.unlock();
         }
-        this.serverLock.unlock();
         return this.toServerUdp;
     }
 
     @Override
     public void closeMe() {
         this.serverLock.lock();
-        if (this.toServerTcp != null) {
-            this.toServerTcp.closeMe();
-            this.toServerTcp = null;
+        try {
+            if (this.toServerTcp != null) {
+                this.toServerTcp.closeMe();
+                this.toServerTcp = null;
+            }
+            if (this.toServerUdp != null) {
+                this.toServerUdp.closeMe();
+                this.toServerUdp = null;
+            }
+        } finally {
+            this.serverLock.unlock();
         }
-        if (this.toServerUdp != null) {
-            this.toServerUdp.closeMe();
-            this.toServerUdp = null;
-        }
-        this.serverLock.unlock();
     }
 
 }

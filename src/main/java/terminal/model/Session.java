@@ -26,16 +26,20 @@ public final class Session implements CloseMe {
 
     public SessionState getState() {
         this.lock.readLock().lock();
-        SessionState tmp = this.state;
-        this.lock.readLock().unlock();
-        return tmp;
+        try {
+            return this.state;
+        } finally {
+            this.lock.readLock().unlock();
+        }
     }
 
     public String getName() {
         this.lock.readLock().lock();
-        String tmp = this.user;
-        this.lock.readLock().unlock();
-        return tmp;
+        try {
+            return this.user;
+        } finally {
+            this.lock.readLock().unlock();
+        }
     }
 
     public ConnectionPlus getConnection() {
@@ -53,16 +57,22 @@ public final class Session implements CloseMe {
 
     public void setAuthenticated(String user) {
         this.lock.writeLock().lock();
-        this.state = SessionState.AUTHENTICATED;
-        this.user = user;
-        this.lock.writeLock().unlock();
+        try {
+            this.state = SessionState.AUTHENTICATED;
+            this.user = user;
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     public void setLoggedOut() {
         this.lock.writeLock().lock();
-        this.state = SessionState.NOBODY;
-        this.user = null;
-        this.lock.writeLock().unlock();
+        try {
+            this.state = SessionState.NOBODY;
+            this.user = null;
+        } finally {
+            this.lock.writeLock().unlock();
+        }
     }
 
     @Override

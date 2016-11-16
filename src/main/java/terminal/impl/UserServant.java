@@ -63,7 +63,8 @@ public abstract class UserServant<R extends ResourceManager> extends Servant<R> 
         } catch (IOException e) {
             this.printError(e);
         } catch (Exception e) {
-            logger.fatal(e);
+            logger.fatal("random exception", e);
+            this.rm.closeMe();
         } finally {
             this.closeMe();
         }

@@ -43,25 +43,27 @@ public final class ServerConnectionManager implements CloseMe {
     public void addNewConnection(NetClient client) throws NetworkException {
         assert client != null;
         this.sessionsLock.writeLock().lock();
-
-        if (this.openSessions == null) {
-            throw new IllegalStateException("SessionManager has already been closed");
-        }
-        assert this.rm != null;
-        assert this.rm.getThreadManager() != null;
-        this.rm.getThreadManager().execute(client);
-
-        ConnectionContainer connection = this.wrapConnection(client);
-        Session session = new Session(connection);
-        this.openSessions.add(session);
-
         try {
-            this.rm.getThreadManager().execute(new ServerTcpServant(session, this.rm));
-        } catch (ServantException e) {
-            throw new InnerServantException("failed to crate server tcp servant", e);
-        }
+            if (this.openSessions == null) {
+                throw new IllegalStateException("SessionManager has already been closed");
+            }
+            assert this.rm != null;
+            assert this.rm.getThreadManager() != null;
+            this.rm.getThreadManager().execute(client);
 
-        this.sessionsLock.writeLock().unlock();
+            ConnectionContainer connection = this.wrapConnection(client);
+            Session session = new Session(connection);
+            this.openSessions.add(session);
+
+            try {
+                this.rm.getThreadManager().execute(new ServerTcpServant(session, this.rm));
+            } catch (ServantException e) {
+                throw new InnerServantException("failed to crate server tcp servant", e);
+            }
+
+        } finally {
+            this.sessionsLock.writeLock().unlock();
+        }
     }
 
     private ConnectionContainer wrapConnection(ConnectionPlus client) {
@@ -73,21 +75,24 @@ public final class ServerConnectionManager implements CloseMe {
      */
     public void broadcast(Session sender, String message) {
         this.sessionsLock.readLock().lock();
-        if (this.openSessions == null) {
-            throw new IllegalStateException("SessionManager has already been closed");
-        }
-        for (Session session : this.openSessions) {
-            if (session != sender) {
-                ConnectionPlus connection = session.getConnection();
-                try {
-                    connection.print(message);
-                } catch (IllegalStateException | NetworkException e) {
-                    // ignore
-                    logger.info(e);
+        try {
+            if (this.openSessions == null) {
+                throw new IllegalStateException("SessionManager has already been closed");
+            }
+            for (Session session : this.openSessions) {
+                if (session != sender) {
+                    ConnectionPlus connection = session.getConnection();
+                    try {
+                        connection.print(message);
+                    } catch (IllegalStateException | NetworkException e) {
+                        // ignore
+                        logger.info(e);
+                    }
                 }
             }
+        } finally {
+            this.sessionsLock.readLock().unlock();
         }
-        this.sessionsLock.readLock().unlock();
     }
 
     /**
@@ -95,71 +100,82 @@ public final class ServerConnectionManager implements CloseMe {
      */
     public void authenticatedBroadcast(Session sender, String message) {
         this.sessionsLock.readLock().lock();
-        if (this.openSessions == null) {
-            throw new IllegalStateException("SessionManager has already been closed");
-        }
-        for (Session session : this.openSessions) {
-            if (session != sender && session.getState() == SessionState.AUTHENTICATED) {
-                ConnectionPlus connection = session.getConnection();
-                try {
-                    connection.print(message);
-                } catch (IllegalStateException | NetworkException e) {
-                    // ignore
-                    logger.info(e);
+        try {
+            if (this.openSessions == null) {
+                throw new IllegalStateException("SessionManager has already been closed");
+            }
+            for (Session session : this.openSessions) {
+                if (session != sender && session.getState() == SessionState.AUTHENTICATED) {
+                    ConnectionPlus connection = session.getConnection();
+                    try {
+                        connection.print(message);
+                    } catch (IllegalStateException | NetworkException e) {
+                        // ignore
+                        logger.info(e);
+                    }
                 }
             }
+        } finally {
+            this.sessionsLock.readLock().unlock();
         }
-        this.sessionsLock.readLock().unlock();
     }
 
     public Session getSession(String name) {
         this.sessionsLock.readLock().lock();
-        if (this.openSessions == null) {
-            throw new IllegalStateException("SessionManager has already been closed");
-        }
-        for (Session session : this.openSessions) {
-            if (session.getName().equals(name)) {
-                this.sessionsLock.readLock().unlock();
-                return session;
+        try {
+            if (this.openSessions == null) {
+                throw new IllegalStateException("SessionManager has already been closed");
             }
+            for (Session session : this.openSessions) {
+                String n = session.getName();
+                if (n != null && n.equals(name)) {
+                    return session;
+                }
+            }
+        } finally {
+            this.sessionsLock.readLock().unlock();
         }
-        this.sessionsLock.readLock().unlock();
         return null;
     }
 
     public List<String> getOnlineUsers() {
         this.sessionsLock.readLock().lock();
-        if (this.openSessions == null) {
-            throw new IllegalStateException("SessionManager has already been closed");
-        }
+        try {
+            if (this.openSessions == null) {
+                throw new IllegalStateException("SessionManager has already been closed");
+            }
 
-        List<String> online = new ArrayList<>();
-        for (Session session : this.openSessions) {
-            ConnectionPlus connection = session.getConnection();
-            if (connection != null && !connection.isClosed()) {
-                String name = session.getName();
-                if (name != null && !name.isEmpty()) {
-                    online.add(name);
+            List<String> online = new ArrayList<>();
+            for (Session session : this.openSessions) {
+                ConnectionPlus connection = session.getConnection();
+                if (connection != null && !connection.isClosed()) {
+                    String name = session.getName();
+                    if (name != null && !name.isEmpty()) {
+                        online.add(name);
+                    }
                 }
             }
+            return online;
+        } finally {
+            this.sessionsLock.readLock().unlock();
         }
-
-        this.sessionsLock.readLock().unlock();
-        return online;
     }
 
 
     @Override
     public void closeMe() {
         this.sessionsLock.writeLock().lock();
-        if (this.openSessions != null) {
-            Iterable<Session> sessions = this.openSessions;
-            this.openSessions = null;
-            for (CloseMe client : sessions) {
-                client.closeMe();
+        try {
+            if (this.openSessions != null) {
+                Iterable<Session> sessions = this.openSessions;
+                this.openSessions = null;
+                for (CloseMe client : sessions) {
+                    client.closeMe();
+                }
             }
+        } finally {
+            this.sessionsLock.writeLock().unlock();
         }
-        this.sessionsLock.writeLock().unlock();
 
         if (this.rm != null) {
             CloseMe closeMe = this.rm;
@@ -181,18 +197,20 @@ public final class ServerConnectionManager implements CloseMe {
 
         private void removeMeFromConnectionList() {
             sessionsLock.writeLock().lock();
-            if (openSessions != null) {
-                Iterator<Session> iterator = openSessions.iterator();
-                while (iterator.hasNext()) {
-                    Session session = iterator.next();
-                    if (session.getConnection() == this) {
-                        iterator.remove();
-                        sessionsLock.writeLock().unlock();
-                        return;
+            try {
+                if (openSessions != null) {
+                    Iterator<Session> iterator = openSessions.iterator();
+                    while (iterator.hasNext()) {
+                        Session session = iterator.next();
+                        if (session.getConnection() == this) {
+                            iterator.remove();
+                            return;
+                        }
                     }
                 }
+            } finally {
+                sessionsLock.writeLock().unlock();
             }
-            sessionsLock.writeLock().unlock();
         }
 
         @Override
