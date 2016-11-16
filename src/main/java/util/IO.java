@@ -4,7 +4,10 @@ import network.NetworkException;
 import network.impl.UdpLimitExceededException;
 
 import java.io.*;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -17,7 +20,11 @@ public final class IO {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 // try to read a line
-                return scanner.nextLine();
+                String line = scanner.nextLine();
+                if (!line.trim().isEmpty()) {
+                    // ignore input if only whitespace
+                    return line;
+                }
             } catch (NoSuchElementException e) {
                 // not a (full) line available jet
                 Thread.sleep(500);

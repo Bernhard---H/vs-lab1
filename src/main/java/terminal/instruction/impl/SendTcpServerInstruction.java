@@ -1,7 +1,7 @@
 package terminal.instruction.impl;
 
 import terminal.SessionState;
-import terminal.instruction.AbstractServerInstruction;
+import terminal.instruction.ASessionServerInstruction;
 import terminal.model.Session;
 import terminal.model.SimpleArgument;
 import terminal.parser.IArgumentsParser;
@@ -11,14 +11,10 @@ import util.ServerResourceManager;
 /**
  * @author Bernhard Halbartschlager
  */
-public final class SendTcpServerInstruction extends AbstractServerInstruction<SimpleArgument> {
-
-    private Session session;
+public final class SendTcpServerInstruction extends ASessionServerInstruction<SimpleArgument> {
 
     public SendTcpServerInstruction(ServerResourceManager rm, Session session) {
-        super(rm);
-        assert session != null;
-        this.session = session;
+        super(rm, session);
     }
 
     @Override

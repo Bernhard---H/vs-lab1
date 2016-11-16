@@ -7,6 +7,7 @@ import terminal.Servant;
 import terminal.ServantException;
 import terminal.exceptions.ParseException;
 import terminal.instruction.impl.InstructionStore;
+import terminal.instruction.impl.LoginTcpServerInstruction;
 import terminal.instruction.impl.SendTcpServerInstruction;
 import terminal.model.Session;
 import terminal.parser.impl.CommandParser;
@@ -30,6 +31,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
 
         this.store = new InstructionStore();
         this.store.register(new SendTcpServerInstruction(rm, session));
+        this.store.register(new LoginTcpServerInstruction(rm, session));
         this.parser = new CommandParser();
     }
 

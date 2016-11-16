@@ -57,7 +57,11 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String login(String username, String password) {
-        return this.sendToServer("!login " + username + " " + password);
+        String response = this.sendToServer("!login " + username + " " + password);
+        if(!response.startsWith("ERROR")){
+            this.rm.getSessionManager().setLoggedinUser(username);
+        }
+        return response;
     }
 
     @Override

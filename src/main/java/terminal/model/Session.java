@@ -57,7 +57,9 @@ public final class Session implements CloseMe {
     @Override
     public void closeMe() {
         this.setLoggedOut();
-        this.connection.closeMe();
-        this.connection = null;
+        if (this.connection != null) {
+            this.connection.closeMe();
+            this.connection = null;
+        }
     }
 }

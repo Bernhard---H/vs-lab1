@@ -15,7 +15,6 @@ public class Chatserver implements IChatserverCli, Runnable {
     private static final Log logger = LogFactory.getLog(Chatserver.class);
 
     private String componentName;
-    private Config config;
     private ServerResourceManager rm;
 
     /**
@@ -27,10 +26,11 @@ public class Chatserver implements IChatserverCli, Runnable {
     public Chatserver(String componentName, Config config,
                       InputStream userRequestStream, PrintStream userResponseStream) {
         this.componentName = componentName;
-        this.config = config;
+
+        Config users = new Config("user");
 
         // TODO
-        this.rm = new ServerResourceManager(this, config, userRequestStream, userResponseStream);
+        this.rm = new ServerResourceManager(this, config, users, userRequestStream, userResponseStream);
     }
 
     @Override

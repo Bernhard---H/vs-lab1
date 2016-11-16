@@ -55,33 +55,33 @@ public final class ClientInterceptServant extends Servant<ClientResourceManager>
     public void run() {
         logger.info("start thread");
 
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    String input = this.connection.read();
-                    try {
-                        this.println(this.runInput(input));
-                    } catch (ArgumentParseException e) {
-                        // command parsed and found in list but wrong argument format
-                        this.printError(e);
-                    } catch (ParseException e) {
-                        this.msgQueue.put(input);
-                    }
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
+                String input = this.connection.read();
+                try {
+                    this.println(this.runInput(input));
+                } catch (ArgumentParseException e) {
+                    // command parsed and found in list but wrong argument format
+                    this.printError(e);
+                } catch (ParseException e) {
+                    this.msgQueue.put(input);
                 }
-            } catch (InterruptedException e) {
-                // ingore and exit
-                //logger.info("thread interrupted: closing");
-            } catch (Exception e) {
-                logger.fatal(e);
-            } finally {
-                this.closeMe();
             }
+        } catch (InterruptedException e) {
+            // ingore and exit
+            //logger.info("thread interrupted: closing");
+        } catch (Exception e) {
+            logger.fatal(e);
+        } finally {
+            this.closeMe();
+        }
 
         logger.info("closing thread");
     }
 
 
     private void println(String msg) {
-        this.rm.getUserResponseStream().println(msg);
+        this.rm.getUserResponseStream().println("\n" + msg);
     }
 
     private void printError(String e) {
