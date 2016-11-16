@@ -160,11 +160,19 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String lastMsg() {
-        return this.rm.getLastPublicMessage();
+        String msg = this.rm.getLastPublicMessage();
+        if (msg == null) {
+            return "ERROR: No message received!";
+        }
+        return msg;
     }
 
     @Override
     public String exit() {
+        if (this.rm.getSessionManager().getLoggedinUser() != null) {
+            // not sure if this is required
+            this.logout();
+        }
         this.rm.closeMe();
         return "see you soon";
     }
