@@ -4,11 +4,14 @@ import network.impl.TcpServer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import terminal.impl.ServerUserServant;
+import terminal.model.Session;
 import util.Config;
 import util.ServerResourceManager;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Chatserver implements IChatserverCli, Runnable {
 
@@ -49,8 +52,24 @@ public class Chatserver implements IChatserverCli, Runnable {
 
     @Override
     public String users() {
-        // TODO Auto-generated method stub
-        return null;
+        Config userConfig = this.rm.getUsers();
+        ArrayList<String> userNames = new ArrayList<>();
+
+        for (String key : userConfig.listKeys()) {
+            userNames.add(key.substring(0, key.length() - ".password".length()));
+        }
+        Collections.sort(userNames);
+
+        String ret = "";
+        int i = 1;
+        for (String name : userNames) {
+            Session session = this.rm.getConnectionManager().getSession(name);
+            ret += i + ". " + name + " ";
+            ret += session == null ? "offline" : "online";
+            ret += "\n";
+            i++;
+        }
+        return ret;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package terminal.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import terminal.instruction.impl.*;
 import util.ClientResourceManager;
 
@@ -7,6 +9,8 @@ import util.ClientResourceManager;
  * @author Bernhard Halbartschlager
  */
 public final class ClientUserServant extends UserServant<ClientResourceManager> {
+
+    private static final Log logger = LogFactory.getLog(ClientUserServant.class);
 
     public ClientUserServant(ClientResourceManager rm, String prompt) {
         super(rm, prompt);
@@ -27,10 +31,10 @@ public final class ClientUserServant extends UserServant<ClientResourceManager> 
     @Override
     protected void printPrompt() {
         String user = this.rm.getSessionManager().getLoggedinUser();
-        String print = "";
+        String print = this.prompt + "> ";
         if (user != null && !user.isEmpty()) {
-            print = user + "@";
+            print = user + "@" + print;
         }
-        this.rm.getUserResponseStream().print(print + this.prompt + "> ");
+        this.rm.getUserResponseStream().print(print);
     }
 }

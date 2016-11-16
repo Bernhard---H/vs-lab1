@@ -33,17 +33,17 @@ public final class IO {
                     }
                 } catch (NoSuchElementException e) {
                     // not a (full) line available jet
-                    Thread.sleep(500);
+                    Thread.sleep(200);
                 }
             } else {
-                Thread.sleep(500);
+                Thread.sleep(200);
             }
         }
         throw new InterruptedException();
     }
 
     public static String interruptableReadln(DatagramSocket socket) throws InterruptedException, IOException {
-        socket.setSoTimeout(500);
+        socket.setSoTimeout(200);
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 byte[] buf = new byte[64 * 1024];
