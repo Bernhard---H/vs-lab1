@@ -43,7 +43,11 @@ public final class Session implements CloseMe {
     }
 
     public ConnectionPlus getConnection() {
-        return this.connection;
+        ConnectionPlus connection = this.connection;
+        if (connection == null){
+            throw new IllegalStateException("session has been closed");
+        }
+        return connection;
     }
 
     public Address getPrivateAddress() {

@@ -1,6 +1,5 @@
 package terminal.impl;
 
-import network.ConnectionPlus;
 import network.NetworkException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,21 +57,18 @@ public final class ServerTcpServant extends Servant implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Session session = this.session;
-                    if (session == null){
-                        throw new InterruptedException();
+                    if (session == null) {
+                        // is closing
+                        return;
                     }
-                    ConnectionPlus connection = session.getConnection();
-                    if (connection == null){
-                        throw new InterruptedException();
-                    }
-                    String line = connection.read();
+                    String line = session.getConnection().read();
                     this.println(this.runInput(line));
                 } catch (ParseException e) {
                     printError(e);
                     logger.info(e);
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IllegalStateException e) {
             // ingore and exit
         } catch (Exception e) {
             logger.fatal("random exception: ", e);
@@ -88,10 +84,7 @@ public final class ServerTcpServant extends Servant implements Runnable {
             // session might already be closed
             Session session = this.session;
             if (session != null) {
-                ConnectionPlus connection = session.getConnection();
-                if (connection != null) {
-                    connection.print("!response: " + msg + "\n");
-                }
+                session.getConnection().print("!response: " + msg + "\n");
             }
         } catch (NetworkException e) {
             // only relevant for udp connections

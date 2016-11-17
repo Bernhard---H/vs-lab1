@@ -63,6 +63,9 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String logout() {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         String response = this.sendToServer("!logout");
         if (!response.startsWith("ERROR")) {
             this.rm.getSessionManager().setLoggedinUser(null);
@@ -73,6 +76,9 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String send(String message) {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         return this.sendToServer("!send " + message);
     }
 
@@ -98,6 +104,9 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String msg(String username, String message) {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         String lookup = this.lookup(username);
         if (lookup.startsWith("ERROR")) {
             return lookup;
@@ -132,6 +141,9 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String lookup(String username) {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         return this.sendToServer("!lookup " + username);
     }
 
@@ -146,6 +158,9 @@ public class Client implements IClientCli, Runnable {
     }
 
     public String registerAddress(Address privateAddress) {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         try {
             PrivateTcpServer tcpServer = new PrivateTcpServer(privateAddress.getPort(), this.rm);
             this.rm.getThreadManager().execute(tcpServer);
@@ -160,6 +175,9 @@ public class Client implements IClientCli, Runnable {
 
     @Override
     public String lastMsg() {
+        if (this.rm.getSessionManager().getLoggedinUser() == null) {
+            return "ERROR unauthorized operation: please log in first";
+        }
         String msg = this.rm.getLastPublicMessage();
         if (msg == null) {
             return "ERROR: No message received!";
